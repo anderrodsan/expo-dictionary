@@ -4,31 +4,32 @@ Translate words between Danish and English, save them into your personal diction
 
 ## Installation
 
-### Expo
+### 1. Expo
 
-# 1. Initialize a new project
+#### 1. Initialize a new project
 ```bash
 npx create-expo-app my-app
 ```
-# 2. Start the development server
+#### 2. Start the development server
 ```bash
 npx expo start
 ```
 
-# Nativewind (TailwindCSS for native)
+### Nativewind (TailwindCSS for native)
 
-# 1. Install Nativewind and TailwindCSS
+#### 1. Install Nativewind and TailwindCSS
 ```bash
 npm install nativewind
 npm install --save-dev tailwindcss@3.3.2
 ```
 
-# 2. Setup Tailwind CSS
+#### 2. Setup Tailwind CSS
 ```bash
 npx tailwindcss init
 ```
 
-# 3. tailwind.config.js
+#### 3. Change the Tailwind Config
+//tailwind.config.js
 ```bash
 module.exports = {
   content: [
@@ -43,9 +44,10 @@ module.exports = {
 }
 ```
 
-# 3. Add the Babel plugin
+#### 3. Add the Babel plugin
+
+//babel.config.js
 ```bash
-# babel.config.js
 module.exports = function (api) {
   api.cache(true);
   return {
