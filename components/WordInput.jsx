@@ -39,7 +39,7 @@ const WordInput = ({ setLatestWord }) => {
   const [language, setLanguage] = useState(false);
 
   return (
-    <View className="flex-1 flex-col w-full justify-center items-center gap-5 pt-10 pb-5 ">
+    <View className="flex-col w-full justify-center items-center gap-5 pt-10 pb-5 ">
       {/* Language Selector */}
       <View className="flex flex-row items-center gap-2 mb-5">
         <Text className="text-white bg-slate-600 rounded-2xl text-sm w-[70px] text-center py-1">
@@ -94,9 +94,7 @@ const WordInput = ({ setLatestWord }) => {
         className="bg-blue-500 px-5 py-1 rounded-xl flex flex-row items-center"
       >
         <MaterialCommunityIcons name="translate" size={22} color="white" />
-        <Text className="text-white text-base ml-2">
-          {loading ? "Saving..." : "New"}
-        </Text>
+        <Text className="text-white text-base ml-2">New</Text>
       </TouchableOpacity>
     </View>
   );

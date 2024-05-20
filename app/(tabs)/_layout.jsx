@@ -36,8 +36,9 @@ const TabsLayout = () => {
             backgroundColor: "#0f172a",
             borderTopWidth: 1,
             borderTopColor: "#232533",
-            height: 120,
+            height: 80,
           },
+          tabBarHideOnKeyboard: true,
         }}
       >
         <Tabs.Screen
@@ -83,7 +84,24 @@ const TabsLayout = () => {
               <TabIcon
                 icon={"cards"}
                 size={30}
-                name={"Flashcards"}
+                name={"Cards"}
+                focused={focused}
+                color={"blue"}
+              />
+            ),
+          }}
+        />
+
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: "Profile",
+            headerShown: false,
+            tabBarIcon: ({ color, focused }) => (
+              <TabIcon
+                icon={"account"}
+                size={30}
+                name={"Profile"}
                 focused={focused}
                 color={"blue"}
               />

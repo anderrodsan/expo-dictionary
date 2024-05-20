@@ -7,6 +7,7 @@ import {
   View,
   Alert,
   RefreshControl,
+  TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome6 } from "@expo/vector-icons";
@@ -14,15 +15,22 @@ import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { clearAllData, fetchSavedWords } from "../data/actions";
+import * as Clipboard from "expo-clipboard";
 
 export default function Json() {
   const [savedWords, setSavedWords] = useState([]);
+  const [editedWords, setEditedWords] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [copied, setCopied] = useState(false);
 
+  // fetch saved words
   useEffect(() => {
-    fetchSavedWords({ setSavedWords });
+    fetchSavedWords({ setSavedWords }).then(() => {
+      setEditedWords(savedWords);
+    });
   }, []);
 
+  // handle clear all data
   const handleClean = async () => {
     Alert.alert(
       "Clear All Data",
@@ -38,10 +46,27 @@ export default function Json() {
     );
   };
 
+  // handle refreshing
   const handleRefresh = async () => {
     setRefreshing(true);
-    fetchSavedWords({ setSavedWords });
+    fetchSavedWords({ setSavedWords }).then(() => {
+      setEditedWords(savedWords);
+    });
     setRefreshing(false);
+  };
+
+  // handle copy to clipboard
+  const handleCopy = async () => {
+    const json = JSON.stringify(savedWords);
+    await Clipboard.setStringAsync(json);
+    setCopied(true);
+    // wait for 3 seconds and then set copied to false
+    setTimeout(() => setCopied(false), 3000);
+  };
+
+  // handle Save changes
+  const handleSave = async () => {
+    // save the edited words into the
   };
 
   return (
@@ -55,17 +80,47 @@ export default function Json() {
         <Text className="flex-1 text-white text-xl font-bold pl-3">
           WordList (JSON)
         </Text>
+
+        {/** Button to save changes, only if teh content is changed 
+        {editedWords !== savedWords && (
+          <TouchableOpacity
+            activeOpacity={0.75}
+            onPress={() => handleSave()}
+            className="p-2 bg-blue-500 rounded-xl flex flex-row items-center space-x-2 mr-2"
+          >
+            <MaterialCommunityIcons
+              name="content-save-check-outline"
+              size={22}
+              color="#cbd5e1"
+            />
+          </TouchableOpacity>
+        )}
+        */}
+
+        {/** Button to copy the json data to clipboard */}
+        <TouchableOpacity
+          activeOpacity={0.75}
+          onPress={() => handleCopy()}
+          className="p-2 bg-slate-700 rounded-xl flex flex-row items-center space-x-2 mr-2"
+        >
+          <MaterialCommunityIcons
+            name={copied ? "clipboard-check-outline" : "clipboard-outline"}
+            size={22}
+            color="#cbd5e1"
+          />
+          {copied && <Text className="text-slate-300">Copied</Text>}
+        </TouchableOpacity>
+
         <TouchableOpacity
           activeOpacity={0.75}
           onPress={() => handleClean()}
-          className="p-2 bg-slate-700 rounded-xl flex flex-row items-center space-x-2"
+          className="p-2 bg-red-700 rounded-xl flex flex-row items-center space-x-2"
         >
           <MaterialCommunityIcons
             name="delete-sweep"
             size={22}
             color="#cbd5e1"
           />
-          <Text className="text-slate-300">Clean</Text>
         </TouchableOpacity>
       </View>
       <ScrollView
@@ -74,10 +129,19 @@ export default function Json() {
         }
         className="flex-1 w-full"
       >
-        {/** Stringified JSON data and show it with prettier */}
+        {/** Stringified JSON data and show it with prettier
         <Text className="text-slate-300 text-start w-full px-5">
           {JSON.stringify(savedWords, null, 2)}
-        </Text>
+        </Text> 
+        */}
+        {/** Stringified JSON data and show it with prettier */}
+        <TextInput
+          className="flex-1 text-slate-300 text-start w-full px-5"
+          value={JSON.stringify(savedWords, null, 2)}
+          multiline={true}
+          //update the editedWords state when the text changes
+          onChangeText={(text) => setEditedWords(JSON.parse(text))}
+        />
       </ScrollView>
     </SafeAreaView>
   );

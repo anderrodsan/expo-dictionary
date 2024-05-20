@@ -15,7 +15,7 @@ const Home = () => {
   const [latestWord, setLatestWord] = useState(null);
 
   return (
-    <SafeAreaView className="bg-slate-800 flex-1 flex-col justify-center items-center w-full">
+    <SafeAreaView className="bg-slate-800 flex-1 flex-col justify-start items-center w-full">
       <TopHeader />
       <WordInput setLatestWord={setLatestWord} />
       <PastWords latestWord={latestWord} />

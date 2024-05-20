@@ -7,7 +7,11 @@ export const fetchSavedWords = async ({ setSavedWords }) => {
   try {
     const savedWordsString = await AsyncStorage.getItem("savedWords");
     if (savedWordsString) {
-      const savedWords = JSON.parse(savedWordsString).reverse();
+      //order the words based on their word.id (higher to lowest)
+      const savedWords = JSON.parse(savedWordsString).sort(
+        (a, b) => b.id - a.id
+      );
+
       //console.log("savedWords", savedWords);
       setSavedWords(savedWords);
     }
@@ -17,15 +21,15 @@ export const fetchSavedWords = async ({ setSavedWords }) => {
 };
 
 //fetch one random word that contains status == "new"
-export const fetchNewWord = async ({ setWord }) => {
+export const fetchNewWord = async ({ setWord, word, filteredStatus }) => {
   try {
     const savedWordsString = await AsyncStorage.getItem("savedWords");
     if (savedWordsString) {
       const savedWords = JSON.parse(savedWordsString).reverse();
 
-      //filter the words that have the status == "new"
+      //filter the words that have the status == filteredStatus and avoid repeating the last word
       const filteredWords =
-        savedWords.filter((word) => word.status === "new") || [];
+        savedWords.filter((item) => item.status === filteredStatus) || [];
 
       //select a random item from filteredWord
       const randomIndex = Math.floor(Math.random() * filteredWords.length);
@@ -59,9 +63,12 @@ export const saveWord = async ({
       );
 
       if (isWordSaved) {
-        alert("This word is already saved.");
         // Remove focus from the input field
         inputRef.current.blur();
+        //find the word and set it as latestWord
+
+        setLatestWord(parsedWords.find((word) => word.danish === text.trim()));
+
         return; // Exit early if the word is already saved
       }
 
@@ -85,20 +92,22 @@ export const saveWord = async ({
           )[0] || null;
 
       //get the type of word (noun, adv, verb, etc.)
-      const types = (await fetchWordType(englishWord)) || null;
+      /*const types = (await fetchWordType(englishWord)) || null;
 
       if (!types) {
         alert("Wrong Word");
         console.log("wrong word");
         return;
       }
+      */
 
       // Create a new word object
       const newWord = {
-        id: parsedWords.length + 1,
+        //give it the id +1 of the highest id word
+        id: Math.max(...parsedWords.map((word) => word.id)) + 1 || 0,
         danish: danishWord,
         english: englishWord,
-        type: types,
+        type: null,
         tag: tag,
         status: "new",
         date: new Date().toISOString().split("T")[0], // Current date in YYYY-MM-DD format

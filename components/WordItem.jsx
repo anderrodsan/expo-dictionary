@@ -10,6 +10,7 @@ import { formatDateLabel } from "../lib/utils";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { removeWord } from "../data/actions";
+import SpeechComponent from "./Speech";
 
 const WordItem = ({ item, index, savedWords, setSavedWords }) => {
   return (
@@ -30,7 +31,10 @@ const WordItem = ({ item, index, savedWords, setSavedWords }) => {
       <View className="flex flex-row justify-between items-center p-3 border border-slate-700 mr-5 rounded-xl mb-2">
         <View className="flex-1 flex-col items-start justify-center">
           <View className="flex-1 flex-row justify-start items-center space-x-3">
-            <Text className="text-white font-bold text-lg">{item.danish}</Text>
+            <Text className="max-w-[90%] text-white font-bold text-lg pr-2">
+              {item.danish}
+            </Text>
+            <SpeechComponent text={item.danish} lang={"da"} size={22} />
             {/* Add Status */}
             {item.status === "Easy" ? null : (
               <Text
@@ -53,9 +57,11 @@ const WordItem = ({ item, index, savedWords, setSavedWords }) => {
               </View>
             )}
           </View>
+
+          {/** Add Type */}
           <View className="flex-1 flex-row justify-start items-center space-x-3">
             <Text className="text-white text-base">{item.english}</Text>
-            {item.type && (
+            {item.type == "0" && (
               <FlatList
                 className="flex-1"
                 horizontal
@@ -71,10 +77,13 @@ const WordItem = ({ item, index, savedWords, setSavedWords }) => {
             )}
           </View>
         </View>
+
+        {/** Add delete button */}
         <TouchableOpacity
           title="Submit"
           activeOpacity={0.75}
           onPress={() => removeWord({ setSavedWords, word: item.danish })}
+          className="ml-2"
         >
           <MaterialCommunityIcons name="delete" size={24} color="#cbd5e1" />
         </TouchableOpacity>
@@ -84,5 +93,3 @@ const WordItem = ({ item, index, savedWords, setSavedWords }) => {
 };
 
 export default WordItem;
-
-const styles = StyleSheet.create({});
