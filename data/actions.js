@@ -3,7 +3,7 @@ import translate from "translate-google-api";
 import { fetchWordType } from "../lib/fetch-word-type";
 
 //fetch saved words
-export const fetchSavedWords = async ({ setSavedWords }) => {
+export const fetchSavedWords = async () => {
   try {
     const savedWordsString = await AsyncStorage.getItem("savedWords");
     if (savedWordsString) {
@@ -13,7 +13,8 @@ export const fetchSavedWords = async ({ setSavedWords }) => {
       );
 
       //console.log("savedWords", savedWords);
-      setSavedWords(savedWords);
+      //setSavedWords(savedWords);
+      return savedWords;
     }
   } catch (error) {
     console.error("Error fetching saved words:", error);
@@ -21,7 +22,7 @@ export const fetchSavedWords = async ({ setSavedWords }) => {
 };
 
 //fetch one random word that contains status == "new"
-export const fetchNewWord = async ({ setWord, word, filteredStatus }) => {
+export const fetchNewWord = async ({ word, filteredStatus }) => {
   try {
     const savedWordsString = await AsyncStorage.getItem("savedWords");
     if (savedWordsString) {
@@ -34,7 +35,7 @@ export const fetchNewWord = async ({ setWord, word, filteredStatus }) => {
       //select a random item from filteredWord
       const randomIndex = Math.floor(Math.random() * filteredWords.length);
       const randomWord = filteredWords[randomIndex];
-      setWord(randomWord);
+      return randomWord;
     }
   } catch (error) {
     console.error("Error fetching saved words:", error);
@@ -140,7 +141,8 @@ export const saveWord = async ({
 };
 
 //remove item from data
-export const removeWord = async ({ setSavedWords, word }) => {
+export const removeWord = async ({ word }) => {
+  console.log("word", word);
   try {
     // fetch data from AsyncStorage
     const existingWords = (await AsyncStorage.getItem("savedWords")) || "[]";
@@ -148,11 +150,10 @@ export const removeWord = async ({ setSavedWords, word }) => {
     //find the word to be removed by the id and remove it to the array
     const parsedWords = JSON.parse(existingWords);
 
-    const newWords = parsedWords.filter((item) => item.danish !== word);
+    const newWords = parsedWords.filter((item) => item.id !== word.id);
 
     // Save the updated words array back to AsyncStorage
     await AsyncStorage.setItem("savedWords", JSON.stringify(newWords));
-    fetchSavedWords({ setSavedWords });
   } catch (error) {
     console.error("Error saving word:", error);
     alert("An error occurred while saving the word. Please try again.");
@@ -161,6 +162,7 @@ export const removeWord = async ({ setSavedWords, word }) => {
 
 //update a word
 export const updateWord = async ({ word }) => {
+  console.log("word", word);
   try {
     // fetch data from AsyncStorage
     const existingWords = (await AsyncStorage.getItem("savedWords")) || "[]";

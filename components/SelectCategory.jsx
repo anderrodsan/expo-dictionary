@@ -5,7 +5,7 @@ import { savedWords } from "../data/savedWords";
 const SelectCategory = ({
   statuses,
   filteredStatus,
-  handleFilter,
+  setFilteredStatus,
   savedWords,
 }) => {
   return (
@@ -13,7 +13,7 @@ const SelectCategory = ({
       <TouchableOpacity
         title="difficulty"
         activeOpacity={0.75}
-        onPress={() => handleFilter("new")}
+        onPress={() => setFilteredStatus("new")}
       >
         <Text
           className={`text-white text-xs text-center rounded-full px-3 py-1 border ${
@@ -39,7 +39,7 @@ const SelectCategory = ({
             key={status.name}
             title="difficulty"
             activeOpacity={0.75}
-            onPress={() => handleFilter(status.name)}
+            onPress={() => setFilteredStatus(status.name)}
           >
             <Text
               className={`text-white text-xs text-center rounded-full px-3 py-1 border 

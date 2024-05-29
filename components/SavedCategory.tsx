@@ -11,13 +11,19 @@ export default function SavedCategory({ category, setCategory, savedWords }) {
       icon: "format-list-bulleted",
     },
     {
+      name: "Liked",
+      value: "fav",
+      color: "slate-500",
+      icon: "cards-heart-outline",
+    },
+    {
       name: "New",
       value: "new",
       color: "blue-500",
       icon: "plus-circle-outline",
     },
     {
-      name: "Known",
+      name: "Easy",
       value: "Easy",
       color: "slate-500",
       icon: "bookmark-check-outline",
@@ -47,7 +53,7 @@ export default function SavedCategory({ category, setCategory, savedWords }) {
             onPress={() => setCategory(item.value)}
             className={`${
               item.value === category
-                ? `bg-blue-500`
+                ? `bg-blue-500 border border-slate-700`
                 : "border border-slate-700"
             } 
               ${index === 0 && "ml-5"}
@@ -66,6 +72,8 @@ export default function SavedCategory({ category, setCategory, savedWords }) {
               >
                 {item.value === "All"
                   ? savedWords.length
+                  : item.value === "fav"
+                  ? savedWords.filter((word) => word.fav).length
                   : savedWords.filter((word) => word.status === item.value)
                       .length}
               </Text>

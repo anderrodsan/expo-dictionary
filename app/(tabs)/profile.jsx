@@ -4,6 +4,7 @@ import {
   ScrollView,
   RefreshControl,
   Dimensions,
+  TouchableOpacity,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
@@ -18,18 +19,23 @@ import {
   StackedBarChart,
 } from "react-native-chart-kit";
 import CategoryChart from "../../components/CategoryChart";
+import { Link } from "expo-router";
 
 export default function Profile() {
   const [savedWords, setSavedWords] = useState([]);
   const [refreshing, setRefreshing] = React.useState(false);
 
   useEffect(() => {
-    fetchSavedWords({ setSavedWords });
+    fetchSavedWords().then((savedWords) => {
+      setSavedWords(savedWords);
+    });
   }, []);
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-    fetchSavedWords({ setSavedWords });
+    fetchSavedWords().then((savedWords) => {
+      setSavedWords(savedWords);
+    });
     setRefreshing(false);
   }, []);
 
@@ -65,11 +71,23 @@ export default function Profile() {
 
   return (
     <View className="bg-slate-800 flex-1 flex-col justify-start">
-      <View className="flex-row items-center px-5 py-6 border-b border-slate-700">
+      <View className="flex-row items-center px-5 py-4 border-b border-slate-700">
         <MaterialCommunityIcons name="account" size={24} color="white" />
         <Text className="flex-1 text-white text-xl font-bold pl-3">
           Profile
         </Text>
+        <TouchableOpacity
+          className="p-2 bg-slate-700 rounded-xl"
+          activeOpacity={0.75}
+        >
+          <Link href={"/json"} className="flex flex-row items-center space-x-3">
+            <MaterialCommunityIcons
+              name="code-json"
+              size={20}
+              color="#cbd5e1"
+            />
+          </Link>
+        </TouchableOpacity>
       </View>
 
       {/** Statistics with charts */}
@@ -79,7 +97,12 @@ export default function Profile() {
         }
         className="flex-1 py-5 space-y-2"
       >
-        <Text className="text-white font-bold text-xl px-5">Statistics</Text>
+        <View className="flex-row justify-between items-center gap-3 px-5">
+          <Text className="flex-1 text-white font-bold text-xl">
+            Statistics
+          </Text>
+        </View>
+
         {/** Number of words by categories */}
         <View className="flex flex-row flex-wrap justify-between px-4">
           {categories.map((category) => (

@@ -25,9 +25,7 @@ export default function Json() {
 
   // fetch saved words
   useEffect(() => {
-    fetchSavedWords({ setSavedWords }).then(() => {
-      setEditedWords(savedWords);
-    });
+    handleRefresh();
   }, []);
 
   // handle clear all data
@@ -49,8 +47,8 @@ export default function Json() {
   // handle refreshing
   const handleRefresh = async () => {
     setRefreshing(true);
-    fetchSavedWords({ setSavedWords }).then(() => {
-      setEditedWords(savedWords);
+    fetchSavedWords().then((savedWords) => {
+      setSavedWords(savedWords);
     });
     setRefreshing(false);
   };
@@ -100,7 +98,7 @@ export default function Json() {
         {/** Button to copy the json data to clipboard */}
         <TouchableOpacity
           activeOpacity={0.75}
-          onPress={() => handleCopy()}
+          onPress={() => addFavFalse(savedWords)}
           className="p-2 bg-slate-700 rounded-xl flex flex-row items-center space-x-2 mr-2"
         >
           <MaterialCommunityIcons

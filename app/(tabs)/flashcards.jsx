@@ -17,9 +17,8 @@ const FlashCards = () => {
   const [filteredStatus, setFilteredStatus] = useState("new");
 
   useEffect(() => {
-    fetchSavedWords({ setSavedWords });
-    fetchNewWord({ setWord, filteredStatus, word });
-  }, []);
+    getNewWord();
+  }, [filteredStatus]);
 
   const statuses = [
     {
@@ -44,21 +43,38 @@ const FlashCards = () => {
 
     updateWord({ word });
     setWord(null);
-    fetchSavedWords({ setSavedWords });
-    fetchNewWord({ setWord, filteredStatus, word });
+    getNewWord();
     setShow(false);
   };
 
   const handleLanguage = () => {
     setLanguage(!language);
-    fetchNewWord({ setWord, filteredStatus, word });
   };
 
   const handleFilter = (status) => {
     setFilteredStatus(status);
     setShow(false);
-    fetchNewWord({ setWord, filteredStatus: status, word });
-    fetchSavedWords({ setSavedWords });
+    getNewWord();
+  };
+
+  //get the saved word list and choose a random new word to show
+  const getNewWord = () => {
+    fetchSavedWords().then((savedWords) => {
+      setSavedWords(savedWords);
+      fetchNewWord({ filteredStatus, word }).then((word) => {
+        setWord(word);
+      });
+      setShow(false);
+    });
+  };
+
+  const handleFavorite = (word) => {
+    //add new value pair fav: true or false
+    word.fav = word.fav ? !word.fav : true;
+
+    updateWord({ word }).then(() => {
+      getNewWord();
+    });
   };
 
   return (
@@ -91,7 +107,7 @@ const FlashCards = () => {
       <SelectCategory
         statuses={statuses}
         filteredStatus={filteredStatus}
-        handleFilter={handleFilter}
+        setFilteredStatus={setFilteredStatus}
         savedWords={savedWords}
       />
 
@@ -103,11 +119,27 @@ const FlashCards = () => {
             title="refresh"
             activeOpacity={0.75}
             onPress={() => {
-              fetchNewWord({ setWord, filteredStatus, word }), setShow(false);
+              getNewWord();
             }}
             className="absolute top-5 right-5"
           >
             <Ionicons name="refresh-sharp" size={24} color="#cbd5e1" />
+          </TouchableOpacity>
+
+          {/** Like button */}
+          <TouchableOpacity
+            title="Submit"
+            activeOpacity={0.75}
+            onPress={() => {
+              handleFavorite(word);
+            }}
+            className="absolute top-5 left-5"
+          >
+            <MaterialCommunityIcons
+              name={word?.fav ? "cards-heart" : "cards-heart-outline"}
+              size={24}
+              color={word?.fav ? "#3b82f6" : "#94a3b8"}
+            />
           </TouchableOpacity>
 
           {/** Word Text */}
@@ -145,6 +177,7 @@ const FlashCards = () => {
                 />
               </View>
 
+              {/** Show Word and Buttons */}
               {show && (
                 <Text className="text-blue-500 text-3xl font-bold pb-32">
                   {language ? word.danish : word.english}
