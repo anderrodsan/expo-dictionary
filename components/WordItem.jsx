@@ -1,24 +1,40 @@
 import {
   FlatList,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { formatDateLabel } from "../lib/utils";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { removeWord, updateWord } from "../data/actions";
 import SpeechComponent from "./Speech";
+import OptionsDrawer from "./OptionsDrawer";
+import EditWord from "./EditWord";
 
-const WordItem = ({ item, index, savedWords, handleRefresh }) => {
+const WordItem = ({ item, index, savedWords, handleRefresh, hide }) => {
+  const [word, setWord] = useState(item);
   const [show, setShow] = useState(false);
+  const [edit, setEdit] = useState(false);
+  const [showTranslation, setShowTranslation] = useState(false);
+
+  useEffect(() => {
+    if (hide) {
+      setShowTranslation(false);
+    } else {
+      setShowTranslation(true);
+    }
+  }, [hide]);
 
   const handleRemove = (word) => {
-    console.log("word", word);
+    //console.log("word", word);
     removeWord({ word }).then(() => {
-      handleRefresh();
+      setWord(word);
+      setShow(false);
+      setEdit(false);
     });
   };
 
@@ -26,9 +42,16 @@ const WordItem = ({ item, index, savedWords, handleRefresh }) => {
     //add new value pair fav: true or false
     word.fav = word.fav ? !word.fav : true;
     console.log("word", word);
-    updateWord(word).then(() => {
-      handleRefresh();
+    updateWord({ word }).then(() => {
+      setWord(word);
+      setEdit(false);
+      setShow(false);
     });
+  };
+
+  const handleEdit = () => {
+    setShow(false);
+    setEdit(true);
   };
 
   return (
@@ -51,7 +74,12 @@ const WordItem = ({ item, index, savedWords, handleRefresh }) => {
           item.fav ? "border-blue-500" : " border-slate-700"
         }`}
       >
-        <View className="flex-1 flex-col items-start justify-center">
+        <Pressable
+          onPress={() => {
+            if (hide) setShowTranslation(!showTranslation);
+          }}
+          className="flex-1 flex-col items-start justify-center"
+        >
           <View className="flex-1 flex-row justify-start items-center space-x-2">
             <Text className="max-w-[90%] text-white font-bold text-lg pr-2">
               {item.danish}
@@ -84,7 +112,11 @@ const WordItem = ({ item, index, savedWords, handleRefresh }) => {
 
           {/** Add Type */}
           <View className="flex-1 flex-row justify-start items-center space-x-3">
-            <Text className="text-white text-base opacity-80">
+            <Text
+              className={`text-base opacity-80 ${
+                showTranslation ? "text-white" : "text-slate-800"
+              }`}
+            >
               {item.english}
             </Text>
             {item.type == "0" && (
@@ -102,23 +134,17 @@ const WordItem = ({ item, index, savedWords, handleRefresh }) => {
               />
             )}
           </View>
-        </View>
-
-        {/** Add popover with options */}
-        <View
-          className={`flex-row items-center bg-slate-800 z-40 py-3 rounded-xl ${
-            show ? "bg-blue-500 px-2 space-x-3" : "space-x-1"
-          }`}
-        >
+        </Pressable>
+        <View className={`flex-row items-center bg-slate-800 z-40 py-3`}>
           {/** Add favorite button if favorite */}
-          {item.fav && !show && (
+          {item.fav && (
             <TouchableOpacity
               title="Submit"
               activeOpacity={0.75}
               onPress={() => {
                 handleFavorite(item);
               }}
-              className=""
+              className="mr-1"
             >
               <MaterialCommunityIcons
                 name="cards-heart"
@@ -127,47 +153,29 @@ const WordItem = ({ item, index, savedWords, handleRefresh }) => {
               />
             </TouchableOpacity>
           )}
-          {/** Open popover */}
-          {show && (
-            <View className="flex-row items-center space-x-3">
-              {/** Add delete button */}
-              <TouchableOpacity
-                title="Submit"
-                activeOpacity={0.75}
-                onPress={() => handleRemove(item)}
-                className=""
-              >
-                <MaterialCommunityIcons name="delete" size={24} color="white" />
-              </TouchableOpacity>
-              {/** Add favorite button */}
-              <TouchableOpacity
-                title="Submit"
-                activeOpacity={0.75}
-                onPress={() => {
-                  handleFavorite(item);
-                }}
-                className="ml-2"
-              >
-                <MaterialCommunityIcons
-                  name={item.fav ? "heart-off" : "cards-heart-outline"}
-                  size={24}
-                  color="white"
-                />
-              </TouchableOpacity>
-            </View>
-          )}
           <TouchableOpacity
             title="Submit"
             activeOpacity={0.75}
             onPress={() => setShow(!show)}
           >
             <MaterialCommunityIcons
-              name={show ? "close" : "dots-vertical"}
+              name={"dots-vertical"}
               size={24}
-              color="white"
+              color="#cbd5e1"
             />
           </TouchableOpacity>
         </View>
+
+        {/** Drawers */}
+        <EditWord word={item} visible={edit} setVisible={setEdit} />
+        <OptionsDrawer
+          word={item}
+          show={show}
+          setShow={setShow}
+          handleEdit={handleEdit}
+          handleFavorite={handleFavorite}
+          handleRemove={handleRemove}
+        />
       </View>
     </View>
   );

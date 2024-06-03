@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Pressable, View, ViewBase } from "react-native";
 import * as Speech from "expo-speech";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -9,13 +9,15 @@ export default function SpeechComponent({
   lang,
   size,
   className,
-}: {
-  text: string;
-  lang: string;
-  size: number;
-  className?: any;
+  autoplay,
 }) {
   const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    if (autoplay) {
+      speak();
+    }
+  }, []);
 
   const speak = () => {
     setPlaying(true);

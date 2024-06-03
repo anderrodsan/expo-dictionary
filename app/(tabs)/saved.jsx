@@ -24,6 +24,9 @@ export default function Saved() {
   const [refreshing, setRefreshing] = useState(false);
   const [category, setCategory] = useState("All");
 
+  //hide all the translations
+  const [hide, setHide] = useState(false);
+
   useEffect(() => {
     handleRefresh();
   }, [category]);
@@ -54,18 +57,18 @@ export default function Saved() {
     <SafeAreaView className="bg-slate-800 flex-1 flex-col justify-start items-center">
       <HeaderSearch
         title="Saved"
-        data={filteredWords}
+        data={savedWords}
         setData={setFilteredWords}
+        hide={hide}
+        setHide={setHide}
         filteredData={filteredWords}
       />
-
       {/** Add Tag Filter */}
       <SavedCategory
         category={category}
         setCategory={setCategory}
         savedWords={savedWords}
       />
-
       {/** Word List */}
       <View className="w-full pl-5 pb-[120px] pt-2">
         {refreshing ? (
@@ -82,6 +85,7 @@ export default function Saved() {
                 savedWords={filteredWords || savedWords}
                 handleRefresh={handleRefresh}
                 item={item}
+                hide={hide}
                 index={index}
               />
             )}

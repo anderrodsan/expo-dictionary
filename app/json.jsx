@@ -16,6 +16,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { clearAllData, fetchSavedWords } from "../data/actions";
 import * as Clipboard from "expo-clipboard";
+import * as FileSystem from "expo-file-system";
 
 export default function Json() {
   const [savedWords, setSavedWords] = useState([]);
@@ -98,7 +99,7 @@ export default function Json() {
         {/** Button to copy the json data to clipboard */}
         <TouchableOpacity
           activeOpacity={0.75}
-          onPress={() => addFavFalse(savedWords)}
+          onPress={() => {}}
           className="p-2 bg-slate-700 rounded-xl flex flex-row items-center space-x-2 mr-2"
         >
           <MaterialCommunityIcons

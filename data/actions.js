@@ -170,7 +170,7 @@ export const updateWord = async ({ word }) => {
     //find the word to be removed by the id and remove it to the array
     const parsedWords = JSON.parse(existingWords);
 
-    const newWords = parsedWords.filter((item) => item.danish !== word.danish);
+    const newWords = parsedWords.filter((item) => item.id !== word.id);
 
     // Add the new word to the array
 
@@ -194,4 +194,11 @@ export const clearAllData = async ({ setSavedWords }) => {
   } catch (error) {
     console.error("Error clearing data from AsyncStorage:", error);
   }
+};
+
+export const toggleFavorite = ({ word }) => {
+  //add new value pair fav: true or false
+  word.fav = word.fav ? !word.fav : true;
+  //console.log("word", word);
+  updateWord({ word });
 };

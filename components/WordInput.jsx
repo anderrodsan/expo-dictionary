@@ -53,9 +53,10 @@ const WordInput = ({ setLatestWord }) => {
   const handleSubmit = () => {
     if (text) {
       setLoading(true);
-      saveWord({ text, setText, tag, setLatestWord, inputRef, language });
+      saveWord({ text, setText, tag, setLatestWord, inputRef, language }).then(
+        setLoading(false)
+      );
       Keyboard.dismiss();
-      setLoading(false);
     }
   };
 
@@ -103,11 +104,11 @@ const WordInput = ({ setLatestWord }) => {
 
       {/* Text Input Field */}
       <TextInput
-        className="text-white text-4xl text-center rounded-xl w-[70%] border border-slate-500 bg-slate-700 px-5 py-5"
+        className="text-white text-3xl text-center rounded-xl w-[70%] border border-slate-500 bg-slate-800 px-5 py-5"
         ref={inputRef} // Assign the ref to the input field
         onChangeText={handleInputChange}
         value={text}
-        placeholder={language ? "Type a Word..." : "Skriv et Ord..."}
+        placeholder={language ? "Type a word..." : "Skriv et ord..."}
         placeholderTextColor="#64748b"
         onSubmitEditing={() => handleSubmit()}
       />
@@ -129,7 +130,7 @@ const WordInput = ({ setLatestWord }) => {
             }}
             className="flex flex-row items-center space-x-2 rounded-full px-3 py-1 border border-slate-600"
           >
-            <Text className="text-white text-sm">
+            <Text className="text-white text-xs">
               {language == false ? word.danish : word.english}
             </Text>
           </TouchableOpacity>
@@ -146,8 +147,8 @@ const WordInput = ({ setLatestWord }) => {
           <ActivityIndicator size="small" color="white" />
         ) : (
           <View className="flex flex-row items-center space-x-2">
-            <MaterialCommunityIcons name="translate" size={22} color="white" />
-            <Text className="text-white text-base ml-2">New</Text>
+            <MaterialCommunityIcons name="translate" size={18} color="white" />
+            <Text className="text-white text-sm ml-2">New</Text>
           </View>
         )}
       </TouchableOpacity>

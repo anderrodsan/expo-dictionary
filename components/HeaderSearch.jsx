@@ -1,11 +1,22 @@
-import { BackHandler, Pressable, Text, TextInput, View } from "react-native";
+import {
+  BackHandler,
+  Pressable,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import React, { useCallback } from "react";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import {
+  Ionicons,
+  MaterialIcons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 
-export default function HeaderSearch({ data, setData }) {
+export default function HeaderSearch({ data, setData, hide, setHide }) {
   const [open, setOpen] = React.useState(false);
 
   //if the back button is pressed
@@ -34,7 +45,12 @@ export default function HeaderSearch({ data, setData }) {
     <View className="flex w-full px-5">
       {open ? (
         <View className="flex-row justify-between items-center w-full space-x-3 pt-4">
-          <Pressable onPress={() => setOpen(false)}>
+          <Pressable
+            onPress={() => {
+              setOpen(false);
+              setData(data);
+            }}
+          >
             <MaterialIcons name="arrow-back" size={24} color="white" />
           </Pressable>
 
@@ -44,7 +60,9 @@ export default function HeaderSearch({ data, setData }) {
             placeholder="Search"
             placeholderTextColor={"gray"}
             onChange={(e) => {
-              if (!e.nativeEvent.text) return setData(data);
+              console.log(e.nativeEvent.text);
+              //if the text is empty
+              if (e.nativeEvent.text === "") return setData(data);
               const filteredData = data.filter((item) => {
                 return item.danish
                   .toLowerCase()
@@ -62,6 +80,28 @@ export default function HeaderSearch({ data, setData }) {
             <Text className="flex-1 text-white text-xl font-bold pl-3">
               Dictionary
             </Text>
+            <TouchableOpacity
+              onPress={() => setHide(!hide)}
+              activeOpacity={0.75}
+              className={`px-2 py-1  rounded-lg mr-5 ${
+                hide ? "bg-blue-500" : "bg-slate-700"
+              }`}
+            >
+              {hide ? (
+                <MaterialCommunityIcons
+                  name="eye-off-outline"
+                  size={20}
+                  color="white"
+                />
+              ) : (
+                <MaterialCommunityIcons
+                  name="eye-outline"
+                  size={20}
+                  color="white"
+                />
+              )}
+            </TouchableOpacity>
+
             <Pressable onPress={() => setOpen(true)}>
               <FontAwesome name="search" size={20} color="white" />
             </Pressable>

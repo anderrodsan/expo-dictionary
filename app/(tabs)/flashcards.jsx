@@ -167,12 +167,13 @@ const FlashCards = () => {
                     <Text className="text-white text-xs">{word.tag}</Text>
                   </View>
                 )}
-                <Text className="font-bold text-white text-4xl py-3">
+                <Text className="font-bold text-white text-4xl pt-5 pb-3">
                   {language ? word.english : word.danish}
                 </Text>
                 <SpeechComponent
                   text={language ? word.english : word.danish}
                   lang={language ? "en" : "da"}
+                  autoplay={true}
                   size={35}
                 />
               </View>
