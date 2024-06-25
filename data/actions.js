@@ -1,6 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import translate from "translate-google-api";
-import { fetchWordType } from "../lib/fetch-word-type";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
+import * as DocumentPicker from "expo-document-picker";
+import { Alert } from "react-native";
 
 //fetch saved words
 export const fetchSavedWords = async () => {
@@ -22,15 +25,16 @@ export const fetchSavedWords = async () => {
 };
 
 //fetch one random word that contains status == "new"
-export const fetchNewWord = async ({ word, filteredStatus }) => {
+export const fetchNewWord = async ({ data, filteredStatus }) => {
   try {
-    const savedWordsString = await AsyncStorage.getItem("savedWords");
-    if (savedWordsString) {
-      const savedWords = JSON.parse(savedWordsString).reverse();
+    //const savedWordsString = await AsyncStorage.getItem("savedWords");
+    if (data) {
+      //console.log("data", data);
+      //const savedWords = JSON.parse(data).reverse();
 
       //filter the words that have the status == filteredStatus and avoid repeating the last word
       const filteredWords =
-        savedWords.filter((item) => item.status === filteredStatus) || [];
+        data.filter((item) => item.status === filteredStatus) || [];
 
       //select a random item from filteredWord
       const randomIndex = Math.floor(Math.random() * filteredWords.length);
@@ -43,14 +47,7 @@ export const fetchNewWord = async ({ word, filteredStatus }) => {
 };
 
 //add word to savedWords
-export const saveWord = async ({
-  setLatestWord,
-  setText,
-  text,
-  tag,
-  inputRef,
-  language,
-}) => {
+export const saveWord = async ({ text, tag, lang1, lang2, swap }) => {
   try {
     // Check if text is not empty
     if (text.trim() !== "") {
@@ -60,35 +57,31 @@ export const saveWord = async ({
 
       // Check if the Danish word is already saved
       const isWordSaved = parsedWords.some(
-        (word) => word.danish === text.trim()
+        (word) => word.lang1 === text.trim()
       );
 
       if (isWordSaved) {
-        // Remove focus from the input field
-        inputRef.current.blur();
-        //find the word and set it as latestWord
+        const newWord = parsedWords.find((word) => word.lang1 === text.trim());
 
-        setLatestWord(parsedWords.find((word) => word.danish === text.trim()));
-
-        return; // Exit early if the word is already saved
+        return newWord; // Exit early if the word is already saved
       }
 
-      //if language is false == danish -> english | true == english -> danish
-      const danishWord = language
+      //if swap is false == danish -> english | true == english -> danish
+      const lang1Word = swap
         ? (
             await translate(`${text.trim()}`, {
-              from: "en",
-              to: "da",
+              from: lang2,
+              to: lang1,
             })
           )[0] || null
         : text.trim();
 
-      const englishWord = language
+      const lang2Word = swap
         ? text.trim()
         : (
             await translate(`${text.trim()}`, {
-              from: "da",
-              to: "en",
+              from: lang1,
+              to: lang2,
             })
           )[0] || null;
 
@@ -106,9 +99,9 @@ export const saveWord = async ({
       const newWord = {
         //give it the id +1 of the highest id word
         id: Math.max(...parsedWords.map((word) => word.id)) + 1 || 0,
-        danish: danishWord,
-        english: englishWord,
-        type: null,
+        lang1: lang1Word,
+        lang2: lang2Word,
+        lang: lang1,
         tag: tag,
         status: "new",
         date: new Date().toISOString().split("T")[0], // Current date in YYYY-MM-DD format
@@ -121,16 +114,9 @@ export const saveWord = async ({
       // Save the updated words array back to AsyncStorage
       await AsyncStorage.setItem("savedWords", JSON.stringify(parsedWords));
 
-      // Reset the text input
-      setText("");
-
-      // Trigger a re-render of the component by toggling the 'refresh' state
-      setLatestWord(newWord);
-
       // Show success message or navigate to another screen
       //alert("Word saved successfully!");
-      // Remove focus from the input field
-      inputRef.current.blur();
+      return newWord;
     } else {
       alert("Please enter a word.");
     }
@@ -185,15 +171,30 @@ export const updateWord = async ({ word }) => {
 };
 
 //clear all data
-export const clearAllData = async ({ setSavedWords }) => {
-  try {
-    // Clear data from AsyncStorage
-    await AsyncStorage.removeItem("savedWords");
-    setSavedWords([]); // Clear the state
-    console.log("Data cleared from AsyncStorage.");
-  } catch (error) {
-    console.error("Error clearing data from AsyncStorage:", error);
-  }
+export const clearAllData = async () => {
+  Alert.alert(
+    "Clear All Data",
+    "Are you sure you want to clear all the data?",
+    [
+      {
+        text: "Cancel",
+        onPress: () => console.log("Cancel Pressed"),
+        style: "cancel",
+      },
+      {
+        text: "OK",
+        onPress: async () => {
+          try {
+            // Clear data from AsyncStorage
+            await AsyncStorage.removeItem("savedWords");
+            console.log("Data cleared from AsyncStorage.");
+          } catch (error) {
+            console.error("Error clearing data from AsyncStorage:", error);
+          }
+        },
+      },
+    ]
+  );
 };
 
 export const toggleFavorite = ({ word }) => {
@@ -201,4 +202,113 @@ export const toggleFavorite = ({ word }) => {
   word.fav = word.fav ? !word.fav : true;
   //console.log("word", word);
   updateWord({ word });
+};
+
+//Function to downoload saved words into a json file
+export const downloadJSONData = async (data) => {
+  // Create and save the JSON file
+  const createAndSaveFile = async (data) => {
+    const json = JSON.stringify(data);
+    //the name of the file should be wordwise-date.json
+    const dateString = new Date().toISOString().split("T")[0];
+    const fileUri =
+      FileSystem.documentDirectory + "wordwise-" + dateString + ".json";
+
+    try {
+      await FileSystem.writeAsStringAsync(fileUri, json, {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+      return fileUri;
+    } catch (error) {
+      console.error("Error writing file:", error);
+      return null;
+    }
+  };
+
+  // Share the file
+  const shareFile = async (fileUri) => {
+    try {
+      await Sharing.shareAsync(fileUri);
+    } catch (error) {
+      console.error("Error sharing file:", error);
+    }
+  };
+
+  if (data) {
+    const fileUri = await createAndSaveFile(data);
+    if (fileUri) {
+      await shareFile(fileUri);
+    }
+  } else {
+    console.error("No data found");
+  }
+};
+
+//Function to upload json file and rewrite the savedWords data
+export const uploadJSONData = async () => {
+  //select the file to be uploaded
+  const fileUri = await DocumentPicker.getDocumentAsync();
+  console.log("fileUri", fileUri.assets[0].uri);
+  if (!fileUri) {
+    //console.error("No file selected");
+    return;
+  }
+
+  //read the .json file and save it in a json variable
+  await FileSystem.readAsStringAsync(fileUri.assets[0].uri, {
+    encoding: FileSystem.EncodingType.UTF8,
+  })
+    .then((data) => {
+      //console.log("fileContent", data);
+      //set the local async storage
+
+      //send an alert saying the data will be overwritten, if accepted, overwrite the data
+      Alert.alert(
+        "Overwrite Data",
+        "Are you sure you want to overwrite the data?",
+        [
+          {
+            text: "Cancel",
+            onPress: () => console.log("Cancel Pressed"),
+            style: "cancel",
+          },
+          {
+            text: "OK",
+            onPress: () => {
+              try {
+                AsyncStorage.setItem("savedWords", data);
+
+                console.log("File uploaded successfully");
+                //return the data
+                return data;
+              } catch (error) {
+                console.error("Error uploading file:", error);
+              }
+            },
+          },
+        ]
+      );
+    })
+    .catch((error) => {
+      console.error("Error reading file:", error);
+    });
+
+  /*set the local async storage
+  try {
+    await AsyncStorage.setItem("savedWords", fileContent);
+    console.log("File uploaded successfully");
+  } catch (error) {
+    console.error("Error uploading file:", error);
+  }
+  */
+};
+
+//get the names of different languages in the list: "da", "en", etc.
+export const getLanguageList = (data) => {
+  return Array.from(new Set(data.map((item) => item.lang)));
+};
+
+//get the words that include the lang: value ("da", "en", etc.)
+export const getLanguageWords = (data, lang) => {
+  return data.filter((item) => item.lang === lang);
 };

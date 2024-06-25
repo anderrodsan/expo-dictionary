@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { Tabs, Redirect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -26,7 +26,7 @@ const TabIcon = ({ icon, size, name, focused }) => {
 };
 const TabsLayout = () => {
   return (
-    <>
+    <SafeAreaView className="flex-1">
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: "#FFA001",
@@ -109,7 +109,7 @@ const TabsLayout = () => {
           }}
         />
       </Tabs>
-    </>
+    </SafeAreaView>
   );
 };
 

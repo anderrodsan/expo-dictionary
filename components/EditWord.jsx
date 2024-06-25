@@ -13,24 +13,24 @@ import { updateWord } from "../data/actions";
 import { useFocusEffect } from "expo-router";
 
 export default function EditWord({ word, visible, setVisible }) {
-  const [danishWord, setDanishWord] = useState("");
-  const [englishWord, setEnglishWord] = useState("");
+  const [lang1Word, setLang1Word] = useState("");
+  const [lang2Word, setLang2Word] = useState("");
   const [tag, setTag] = useState("");
 
   useEffect(() => {
-    setDanishWord(word.danish);
-    setEnglishWord(word.english);
+    setLang1Word(word.lang1);
+    setLang2Word(word.lang2);
     setTag(word.tag);
   }, [word]);
 
   //Function to update the word
   const handleUpdate = (word) => {
     //add new value pair fav: true or false
-    word.danish = danishWord;
-    word.english = englishWord;
+    word.lang1 = lang1Word;
+    word.lang2 = lang2Word;
     word.tag = tag ? tag : word.tag;
 
-    console.log("word", danishWord, englishWord, word);
+    console.log("word", lang1Word, lang2Word, word);
     updateWord({ word }).then(() => {
       setVisible(false);
     });
@@ -77,8 +77,8 @@ export default function EditWord({ word, visible, setVisible }) {
             activeOpacity={0.75}
             onPress={() => {
               setVisible(false);
-              setDanishWord(word.danish);
-              setEnglishWord(word.english);
+              setLang1Word(word.lang1);
+              setLang2Word(word.lang2);
             }}
             className="absolute top-0 right-0 p-5"
           >
@@ -103,14 +103,14 @@ export default function EditWord({ word, visible, setVisible }) {
 
           {/** Text Inputs for danish and english words */}
           <TextInput
-            value={danishWord}
-            onChangeText={(input) => setDanishWord(input)}
+            value={lang1Word}
+            onChangeText={(input) => setLang1Word(input)}
             className="text-white text-base font-bold px-3 py-2 border border-slate-500 rounded-xl w-full mb-3"
           />
 
           <TextInput
-            value={englishWord}
-            onChangeText={(input) => setEnglishWord(input)}
+            value={lang2Word}
+            onChangeText={(input) => setLang2Word(input)}
             className="text-blue-500 text-base font-bold px-3 py-2 border border-slate-500 rounded-xl w-full"
           />
 

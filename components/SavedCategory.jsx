@@ -42,13 +42,17 @@ export default function SavedCategory({ category, setCategory, savedWords }) {
     },
   ];
 
+  if (!savedWords) {
+    return null;
+  }
+
   return (
     <View className="w-full py-4 border-b border-slate-700">
       <FlatList
         horizontal
         showsHorizontalScrollIndicator={false}
         data={options}
-        renderItem={({ item, index }: any) => (
+        renderItem={({ item, index }) => (
           <Pressable
             onPress={() => setCategory(item.value)}
             className={`${

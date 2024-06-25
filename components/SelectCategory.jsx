@@ -1,6 +1,5 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
-import { savedWords } from "../data/savedWords";
 
 const SelectCategory = ({
   statuses,
@@ -14,14 +13,13 @@ const SelectCategory = ({
         title="difficulty"
         activeOpacity={0.75}
         onPress={() => setFilteredStatus("new")}
+        className={`rounded-full px-3 py-1 border ${
+          filteredStatus === "new"
+            ? "bg-blue-500 border-blue-500"
+            : " border-slate-500"
+        }`}
       >
-        <Text
-          className={`text-white text-xs text-center rounded-full px-3 py-1 border ${
-            filteredStatus === "new"
-              ? "bg-blue-500 border-blue-500"
-              : " border-slate-500"
-          }`}
-        >
+        <Text className="text-white text-xs text-center">
           New ({savedWords.filter((word) => word.status === "new").length})
         </Text>
       </TouchableOpacity>
@@ -40,16 +38,15 @@ const SelectCategory = ({
             title="difficulty"
             activeOpacity={0.75}
             onPress={() => setFilteredStatus(status.name)}
+            className={`rounded-full px-3 py-1 border 
+              ${
+                filteredStatus === status.name
+                  ? status.color + " border-" + status.color
+                  : " border-slate-500"
+              }
+              `}
           >
-            <Text
-              className={`text-white text-xs text-center rounded-full px-3 py-1 border 
-            ${
-              filteredStatus === status.name
-                ? status.color + " border-" + status.color
-                : " border-slate-500"
-            }
-            `}
-            >
+            <Text className="text-white text-xs text-center">
               {status.name} ({wordCount.length})
             </Text>
           </TouchableOpacity>

@@ -17,7 +17,7 @@ export default function SpeechComponent({
     if (autoplay) {
       speak();
     }
-  }, []);
+  }, [text]);
 
   const speak = () => {
     setPlaying(true);

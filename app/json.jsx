@@ -14,9 +14,12 @@ import { FontAwesome6 } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { clearAllData, fetchSavedWords } from "../data/actions";
+import {
+  clearAllData,
+  downloadJSONData,
+  fetchSavedWords,
+} from "../data/actions";
 import * as Clipboard from "expo-clipboard";
-import * as FileSystem from "expo-file-system";
 
 export default function Json() {
   const [savedWords, setSavedWords] = useState([]);
@@ -63,15 +66,10 @@ export default function Json() {
     setTimeout(() => setCopied(false), 3000);
   };
 
-  // handle Save changes
-  const handleSave = async () => {
-    // save the edited words into the
-  };
-
   return (
     <SafeAreaView className="relative flex-1 items-center justify-center bg-slate-800 text-white">
       {/** Header */}
-      <View className="flex flex-row px-5 py-5 w-full border-b border-slate-700 mb-5 items-center justify-start">
+      <View className="flex flex-row px-5 py-4 w-full border-b border-slate-700 mb-5 items-center justify-start">
         <Link href={"/(tabs)/saved"}>
           <Ionicons name="arrow-back" size={22} color="white" />
         </Link>
@@ -79,36 +77,6 @@ export default function Json() {
         <Text className="flex-1 text-white text-xl font-bold pl-3">
           WordList (JSON)
         </Text>
-
-        {/** Button to save changes, only if teh content is changed 
-        {editedWords !== savedWords && (
-          <TouchableOpacity
-            activeOpacity={0.75}
-            onPress={() => handleSave()}
-            className="p-2 bg-blue-500 rounded-xl flex flex-row items-center space-x-2 mr-2"
-          >
-            <MaterialCommunityIcons
-              name="content-save-check-outline"
-              size={22}
-              color="#cbd5e1"
-            />
-          </TouchableOpacity>
-        )}
-        */}
-
-        {/** Button to copy the json data to clipboard */}
-        <TouchableOpacity
-          activeOpacity={0.75}
-          onPress={() => {}}
-          className="p-2 bg-slate-700 rounded-xl flex flex-row items-center space-x-2 mr-2"
-        >
-          <MaterialCommunityIcons
-            name={copied ? "clipboard-check-outline" : "clipboard-outline"}
-            size={22}
-            color="#cbd5e1"
-          />
-          {copied && <Text className="text-slate-300">Copied</Text>}
-        </TouchableOpacity>
 
         <TouchableOpacity
           activeOpacity={0.75}
@@ -122,6 +90,7 @@ export default function Json() {
           />
         </TouchableOpacity>
       </View>
+
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
@@ -134,13 +103,9 @@ export default function Json() {
         </Text> 
         */}
         {/** Stringified JSON data and show it with prettier */}
-        <TextInput
-          className="flex-1 text-slate-300 text-start w-full px-5"
-          value={JSON.stringify(savedWords, null, 2)}
-          multiline={true}
-          //update the editedWords state when the text changes
-          onChangeText={(text) => setEditedWords(JSON.parse(text))}
-        />
+        <Text className="flex-1 text-slate-300 text-start w-full px-5">
+          {JSON.stringify(savedWords, null, 2)}
+        </Text>
       </ScrollView>
     </SafeAreaView>
   );

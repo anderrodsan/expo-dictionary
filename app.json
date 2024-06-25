@@ -1,10 +1,11 @@
 {
   "expo": {
     "name": "wordwise",
+    "displayName": "WordWise",
     "slug": "wordwise",
     "scheme": "sora",
     "description": "A word learning app",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
