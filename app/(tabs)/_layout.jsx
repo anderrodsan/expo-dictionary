@@ -7,7 +7,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 // The component is used to render the tabs in the app.
 const TabIcon = ({ icon, size, name, focused }) => {
   return (
-    <View className="flex-1 items-center justify-center gap-1">
+    <View className="flex-1 items-center justify-center space-y-1 pt-3">
       <MaterialCommunityIcons
         name={icon}
         size={size}
@@ -36,7 +36,7 @@ const TabsLayout = () => {
             backgroundColor: "#0f172a",
             borderTopWidth: 1,
             borderTopColor: "#232533",
-            height: 80,
+            height: 70,
           },
           tabBarHideOnKeyboard: true,
         }}

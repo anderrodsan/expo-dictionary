@@ -21,6 +21,11 @@ import SelectCategory from "../../components/SelectCategory";
 import SpeechComponent from "../../components/Speech";
 import SavedLangSelector from "../../components/SavedLangSelector";
 import { useLang, useLanguageList } from "../../lib/store/store";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 const FlashCards = () => {
   //open the drawer and show the word
@@ -42,8 +47,25 @@ const FlashCards = () => {
   const [savedWords, setSavedWords] = useState([]);
   const [filteredStatus, setFilteredStatus] = useState("new");
 
+  //Animation for opacity
+  const opacity = useSharedValue(0);
+  const position = useSharedValue(0);
+
+  //Change opacity to 0 and after 300 ms to 1 once the show is true
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+      transform: [{ translateY: position.value }],
+    };
+  });
+
   useEffect(() => {
-    //getNewWord();
+    opacity.value = withTiming(show ? 1 : 0, { duration: 300 });
+    position.value = withTiming(show ? 0 : 20, { duration: 200 });
+  }, [show]);
+
+  useEffect(() => {
+    getNewWord();
   }, [filteredStatus, lang]);
 
   const statuses = [
@@ -97,6 +119,9 @@ const FlashCards = () => {
       });
       setShow(false);
       setLoading(false);
+      if (!word) {
+        setFilteredStatus("Medium");
+      }
     });
   };
 
@@ -153,9 +178,12 @@ const FlashCards = () => {
 
               {/** Secondary word */}
               {show && !loading && (
-                <Text className="text-blue-500 text-2xl text-center font-bold">
+                <Animated.Text
+                  style={animatedStyle}
+                  className="text-blue-500 text-2xl text-center font-bold"
+                >
                   {swap ? word.lang1 : word.lang2}
-                </Text>
+                </Animated.Text>
               )}
 
               {/** Loading  */}
@@ -167,10 +195,12 @@ const FlashCards = () => {
 
               {/** Difficulty Buttons or RevealButton */}
               {show && !loading ? (
-                <DifficultyButtons
-                  statuses={statuses}
-                  handleUpdate={handleUpdate}
-                />
+                <Animated.View style={animatedStyle}>
+                  <DifficultyButtons
+                    statuses={statuses}
+                    handleUpdate={handleUpdate}
+                  />
+                </Animated.View>
               ) : (
                 <TouchableOpacity
                   title="Submit"
@@ -193,32 +223,89 @@ const FlashCards = () => {
 export default FlashCards;
 
 function RefreshButton({ getNewWord }) {
+  const opacity = useSharedValue(1);
+  const rotate = useSharedValue(0);
+
+  const animatedIconStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotate.value}deg` }],
+    opacity: opacity.value,
+  }));
+
+  function handleRefresh() {
+    //set opacity to 0 and after 300 ms to 1
+    opacity.value = 0.5;
+    getNewWord();
+    rotate.value = withTiming(rotate.value + 360, { duration: 300 });
+    opacity.value = withTiming(1, { duration: 1000 });
+  }
+
   return (
     <TouchableOpacity
       title="refresh"
       activeOpacity={0.75}
       onPress={() => {
-        getNewWord();
+        handleRefresh();
       }}
       className="absolute top-5 right-5"
     >
-      <Ionicons name="refresh-sharp" size={24} color="#cbd5e1" />
+      <Animated.View style={animatedIconStyle}>
+        <Ionicons name="refresh-sharp" size={24} color="#cbd5e1" />
+      </Animated.View>
     </TouchableOpacity>
   );
 }
 
 function LanguageSwitcher({ handleLanguage }) {
+  const opacity = useSharedValue(1);
+  const rotate = useSharedValue(0);
+  const [swap, setSwap] = useState(false);
+
+  function handleSwap() {
+    //set opacity to 0 and after 300 ms to 1
+    opacity.value = 0.5;
+    handleLanguage();
+
+    //if swap rotate to one side and if not swap rotate to other side
+    if (swap) {
+      rotate.value = withTiming(rotate.value - 180, { duration: 300 });
+    } else {
+      rotate.value = withTiming(rotate.value + 180, { duration: 300 });
+    }
+    setSwap(!swap);
+    opacity.value = withTiming(1, { duration: 1000 });
+  }
+
+  const animatedIconStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotate.value}deg` }],
+    opacity: opacity.value,
+  }));
+
   return (
     <View className="pt-4">
       <TouchableOpacity
         title="Submit"
         activeOpacity={0.75}
         className="flex-row items-center space-x-1 px-3 py-1 bg-slate-700 rounded-xl"
-        onPress={() => handleLanguage()}
+        onPress={() => handleSwap()}
       >
-        <Ionicons name="language" size={20} color="#cbd5e1" />
-        <Ionicons name="repeat-sharp" size={24} color="#cbd5e1" />
-        <Ionicons name="language" size={20} color="#cbd5e1" />
+        <Animated.View style={{ opacity: opacity }}>
+          <Ionicons
+            name="language"
+            size={20}
+            color={swap ? "#cbd5e1" : "#3b82f6"}
+          />
+        </Animated.View>
+        <Animated.View style={animatedIconStyle}>
+          <Ionicons name="repeat-sharp" size={24} color="#cbd5e1" />
+        </Animated.View>
+
+        <Animated.View style={{ opacity: opacity }}>
+          <Ionicons
+            name="language"
+            size={20}
+            color={swap ? "#3b82f6" : "#cbd5e1"}
+          />
+        </Animated.View>
       </TouchableOpacity>
     </View>
   );

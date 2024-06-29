@@ -277,7 +277,6 @@ export const uploadJSONData = async () => {
             onPress: () => {
               try {
                 AsyncStorage.setItem("savedWords", data);
-
                 console.log("File uploaded successfully");
                 //return the data
                 return data;

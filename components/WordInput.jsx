@@ -17,6 +17,11 @@ import LanguageSelector from "./LanguageSelector";
 import { findLanguage, languageOptions } from "../data/languageOptions";
 import SavedLangSelector from "./SavedLangSelector";
 import { useLanguageList } from "../lib/store/store";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 const WordInput = ({ setLatestWord, savedWords, lang1, setLang1 }) => {
   const [text, setText] = useState("");
@@ -143,10 +148,15 @@ const WordInput = ({ setLatestWord, savedWords, lang1, setLang1 }) => {
       />
 
       {/** Display the first 3 filtered words */}
-      <SuggestedWords filteredWords={filteredWords} />
+      <SuggestedWords
+        filteredWords={filteredWords}
+        setFilteredWords={setFilteredWords}
+        setText={setText}
+        setLatestWord={setLatestWord}
+      />
 
       {/** Submit Button */}
-      <SubmitWord loading={loading} handleSubmit={handleSubmit} />
+      <SubmitWord text={text} loading={loading} handleSubmit={handleSubmit} />
     </View>
   );
 };
@@ -165,6 +175,27 @@ function LanguageSwitcher({
   setShow2,
   ...props
 }) {
+  const opacity = useSharedValue(1);
+  const rotate = useSharedValue(0);
+
+  function handleSwap() {
+    //set opacity to 0 and after 300 ms to 1
+    opacity.value = 0.5;
+    //if swap rotate to one side and if not swap rotate to other side
+    if (swap) {
+      rotate.value = withTiming(rotate.value - 180, { duration: 300 });
+    } else {
+      rotate.value = withTiming(rotate.value + 180, { duration: 300 });
+    }
+    setSwap(!swap);
+    opacity.value = withTiming(1, { duration: 300 });
+  }
+
+  const animatedIconStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotate.value}deg` }],
+    opacity: opacity.value,
+  }));
+
   return (
     <View className="relative flex-row items-center justify-center px-5 pb-5">
       <View className="w-1/2 items-end px-5">
@@ -176,9 +207,12 @@ function LanguageSwitcher({
             swap ? "bg-slate-700" : "bg-blue-500/50"
           }`}
         >
-          <Text className="text-white text-center">
+          <Animated.Text
+            style={{ opacity: opacity }}
+            className="text-white text-center"
+          >
             {swap ? findLanguage(lang2)?.name : findLanguage(lang1)?.name}
-          </Text>
+          </Animated.Text>
         </Pressable>
       </View>
 
@@ -186,11 +220,14 @@ function LanguageSwitcher({
       <TouchableOpacity
         title="Submit"
         activeOpacity={0.75}
-        onPress={() => setSwap(!swap)}
+        onPress={() => handleSwap()}
         className="absolute inset-0 top-1"
       >
-        <Ionicons name="repeat-sharp" size={20} color="white" />
+        <Animated.View style={animatedIconStyle}>
+          <Ionicons name="repeat-sharp" size={20} color="white" />
+        </Animated.View>
       </TouchableOpacity>
+
       <View className="w-1/2 items-start px-5">
         <Pressable
           onPress={() => setShow2(true)}
@@ -198,9 +235,12 @@ function LanguageSwitcher({
             swap ? "bg-blue-500/50" : "bg-slate-700"
           }`}
         >
-          <Text className="text-white text-center">
+          <Animated.Text
+            style={{ opacity: opacity }}
+            className="text-white text-center"
+          >
             {swap ? findLanguage(lang1)?.name : findLanguage(lang2)?.name}
-          </Text>
+          </Animated.Text>
         </Pressable>
       </View>
     </View>
@@ -230,34 +270,63 @@ function TagInput({ handleTagChange, tag, inputRef }) {
 }
 
 //Display the first 3 filtered words
-function SuggestedWords({ filteredWords }) {
+function SuggestedWords({
+  filteredWords,
+  setFilteredWords,
+  setLatestWord,
+  setText,
+}) {
+  //Animation with reanimated (push the submit button down and )
+  const height = useSharedValue(0);
+  const opacity = useSharedValue(0);
+
+  if (filteredWords?.length > 0) {
+    height.value = withTiming(40, { duration: 300 });
+    opacity.value = withTiming(1, { duration: 420 });
+  } else {
+    height.value = withTiming(0, { duration: 300 });
+    opacity.value = withTiming(0, { duration: 300 });
+  }
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    height: height.value,
+    opacity: opacity.value,
+  }));
+
   return (
-    <View className="flex flex-row items-center justify-center space-x-2">
-      {filteredWords?.slice(0, 3).map((word) => (
-        <TouchableOpacity
-          key={word?.lang1}
-          title="difficulty"
-          activeOpacity={0.75}
-          onPress={() => {
-            setText(word?.lang1);
-            setFilteredWords(null);
-          }}
-          className="flex flex-row items-center space-x-2 rounded-full px-3 py-1 border border-slate-600 opacity-60 mt-3"
-        >
-          <Text className="text-white text-xs">{word?.lang1}</Text>
-        </TouchableOpacity>
-      ))}
-    </View>
+    <Animated.View
+      style={animatedStyle}
+      className="flex flex-row items-center justify-center space-x-2"
+    >
+      {filteredWords?.length > 0 &&
+        filteredWords?.slice(0, 3).map((word) => (
+          <TouchableOpacity
+            key={word?.lang1}
+            title="difficulty"
+            activeOpacity={0.75}
+            onPress={() => {
+              setLatestWord(word);
+              setText(null);
+              setFilteredWords(null);
+            }}
+            className="flex flex-row items-center space-x-2 rounded-full px-3 py-1 border border-slate-600 opacity-60 mt-3"
+          >
+            <Text className="text-white text-xs">{word?.lang1}</Text>
+          </TouchableOpacity>
+        ))}
+    </Animated.View>
   );
 }
 
-function SubmitWord({ handleSubmit, loading }) {
+function SubmitWord({ text, handleSubmit, loading }) {
   return (
     <TouchableOpacity
       title="Submit"
       activeOpacity={0.75}
       onPress={() => handleSubmit()}
-      className="bg-blue-500 px-5 py-1 rounded-xl mt-5"
+      className={`px-5 py-1 rounded-xl mt-5 transition ease-in-out duration-1000 ${
+        text ? "bg-blue-500" : "bg-blue-500/50"
+      }`}
     >
       {loading ? (
         <ActivityIndicator size="small" color="white" />

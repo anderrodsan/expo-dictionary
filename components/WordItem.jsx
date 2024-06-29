@@ -14,6 +14,11 @@ import { removeWord, updateWord } from "../data/actions";
 import SpeechComponent from "./Speech";
 import OptionsDrawer from "./OptionsDrawer";
 import EditWord from "./EditWord";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 const WordItem = ({ item, index, savedWords, handleRefresh, hide, lang }) => {
   const [word, setWord] = useState(item);
@@ -52,6 +57,16 @@ const WordItem = ({ item, index, savedWords, handleRefresh, hide, lang }) => {
     setShow(false);
     setEdit(true);
   };
+
+  //Animation when hiding the translation
+  const opacity = useSharedValue(0.8);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    opacity.value = withTiming(showTranslation ? 0.8 : 0, { duration: 200 });
+    return {
+      opacity: opacity.value,
+    };
+  }, [showTranslation]);
 
   const dateLabel = useMemo(() => {
     return index === 0 || savedWords[index - 1].date !== item.date ? (
@@ -142,13 +157,13 @@ const WordItem = ({ item, index, savedWords, handleRefresh, hide, lang }) => {
           </View>
 
           <View className="flex-1 flex-row justify-start items-center space-x-3">
-            <Text
-              className={`text-base opacity-80 ${
-                showTranslation ? "text-white" : "text-slate-800"
-              }`}
+            <Animated.Text
+              style={animatedStyle}
+              className={`text-base text-white
+              `}
             >
               {item.lang2}
-            </Text>
+            </Animated.Text>
             {typeView}
           </View>
         </Pressable>

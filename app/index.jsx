@@ -1,6 +1,6 @@
 import { Link, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { Pressable, Text, View } from "react-native";
+import { Linking, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -8,6 +8,11 @@ import { useLang, useLanguageList } from "../lib/store/store";
 import { fetchSavedWords, getLanguageList } from "../data/actions";
 import { findLanguage } from "../data/languageOptions";
 import LanguageSelector from "../components/LanguageSelector";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 export default function Page() {
   const [show, setShow] = useState(false);
@@ -29,6 +34,10 @@ export default function Page() {
         setLangList([]);
       }
     });
+
+    //set the position 0 and opacity 1
+    opacity.value = withTiming(1, { duration: 500 });
+    position.value = withTiming(0, { duration: 500 });
   }, []);
 
   // ref
@@ -39,22 +48,49 @@ export default function Page() {
     bottomSheetModalRef.current?.present();
   }, []);
 
+  //Animate the language options with a delay depending on their index
+  const opacity = useSharedValue(0);
+  const position = useSharedValue(50);
+
+  // Animate only with opacity
+  const animatedOpacity = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+    };
+  });
+
+  const animatedWithTransition = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+      transform: [{ translateY: position.value }],
+    };
+  });
+
   return (
     <SafeAreaView className="relative flex-1 items-center justify-center bg-slate-800 text-white">
-      <View className="flex flex-col items-center justify-center gap-3 w-full p-10 scale-150">
+      <Animated.View
+        style={animatedOpacity}
+        className="flex flex-col items-center justify-center gap-3 w-full p-10 scale-150"
+      >
         <FontAwesome6 name="book" size={50} color="#cbd5e1" />
         <Text className="text-slate-300 font-bold text-3xl">
           Word
           <Text className="text-blue-500">Wise</Text>
         </Text>
-      </View>
-      <Text className="text-slate-500 font-bold text-lg mt-10 mb-3">
+      </Animated.View>
+      <Animated.Text
+        style={animatedOpacity}
+        className="text-slate-500 font-bold text-lg mt-10 mb-3"
+      >
         Select Language
-      </Text>
+      </Animated.Text>
 
       {/** Language selector */}
       {langList?.length > 0 ? (
-        <View className="flex-row justify-center items-center flex-wrap w-full px-5">
+        <Animated.View
+          style={animatedWithTransition}
+          className="flex-row justify-center items-center flex-wrap w-full px-5"
+        >
           {/** Display the first 3 languages if the list is more than 3 */}
           {langList?.slice(0, 4).map((lang, index) => {
             //Avoid empty item in iOS
@@ -95,20 +131,45 @@ export default function Page() {
               More
             </Text>
           </Pressable>
-        </View>
+        </Animated.View>
       ) : (
-        <Pressable
-          onPress={() => {
-            setShow(true);
-          }}
-          className="px-3 py-2 rounded-xl bg-blue-500 text-white text-base mt-10 font-light"
-        >
-          <Text className="text-white text-base text-center">Get Started</Text>
-        </Pressable>
+        <Animated.View style={animatedWithTransition}>
+          <Pressable
+            onPress={() => {
+              setShow(true);
+            }}
+            className="px-3 py-2 rounded-xl bg-blue-500 text-white text-base mt-10 font-light"
+          >
+            <Text className="text-white text-base text-center">
+              Get Started
+            </Text>
+          </Pressable>
+        </Animated.View>
       )}
-      <Text className="absolute bottom-10 text-slate-500 font-bold text-lg">
-        Powered by Andr
-      </Text>
+      <Animated.View
+        style={animatedWithTransition}
+        className="absolute bottom-10 justify-center items-center space-y-3"
+      >
+        <Text className="text-slate-500 font-bold text-lg">
+          Powered by Ander
+        </Text>
+        <View className="flex-row items-center space-x-3">
+          <Pressable
+            className="p-3 rounded-xl bg-slate-700"
+            onPress={() =>
+              Linking.openURL("https://www.linkedin.com/in/anderrodsan")
+            }
+          >
+            <FontAwesome6 name="linkedin" size={20} color="#94a3b8" />
+          </Pressable>
+          <Pressable
+            className="p-3 rounded-xl bg-slate-700"
+            onPress={() => Linking.openURL("https://github.com/anderrodsan")}
+          >
+            <FontAwesome6 name="github" size={20} color="#94a3b8" />
+          </Pressable>
+        </View>
+      </Animated.View>
 
       {/** Language selector modal for lang1*/}
       <View className="absolute inset-0 z-40">

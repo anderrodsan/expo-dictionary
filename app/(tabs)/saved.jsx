@@ -93,7 +93,7 @@ export default function Saved() {
   );
 
   return (
-    <SafeAreaView className="bg-slate-800 flex-1 flex-col justify-start items-center">
+    <View className="bg-slate-800 flex-1 flex-col justify-start items-center">
       <HeaderSearch
         data={savedWords}
         setData={setFilteredWords}
@@ -113,8 +113,8 @@ export default function Saved() {
       {/** Word List */}
       <View className="w-full pl-5 pb-[120px] pt-2">
         {refreshing ? (
-          <View className="flex h-full justify-center items-center opacity-50">
-            <ActivityIndicator size={10} color="#3b82f6" />
+          <View className="flex h-full w-full pr-5 justify-center items-center opacity-50">
+            <ActivityIndicator size={30} color="#3b82f6" />
           </View>
         ) : (
           <FlatList
@@ -136,14 +136,14 @@ export default function Saved() {
             onEndReachedThreshold={0.5}
             ListFooterComponent={() =>
               loadingMore ? (
-                <View style={{ paddingVertical: 20 }}>
-                  <ActivityIndicator size="large" color="#94a3b8" />
+                <View style={{ paddingVertical: 40, paddingLeft: 5 }}>
+                  <ActivityIndicator size={20} color="#94a3b8" />
                 </View>
               ) : null
             }
           />
         )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }

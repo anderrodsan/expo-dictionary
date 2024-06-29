@@ -1,19 +1,42 @@
 //starter rnfes
-
-import { StyleSheet, Text, View } from "react-native";
-import React from "react";
-import { Slot, Stack } from "expo-router";
-import { StatusBar } from "react-native";
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import React, { useEffect, useState } from "react";
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import * as SplashScreen from "expo-splash-screen";
+import { View } from "react-native";
 
 const RootLayout = () => {
+  const [appIsReady, setAppIsReady] = useState(false);
+  // Load splash screen prior to rendering the app
+  useEffect(() => {
+    async function prepare() {
+      try {
+        // Artificially delay for two seconds to simulate a slow loading experience.
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setAppIsReady(true);
+        await SplashScreen.hideAsync();
+      }
+    }
+
+    prepare();
+  }, []);
+
+  if (!appIsReady) {
+    return <View className="flex-1 bg-slate-800" />;
+  }
+
   return (
     <>
-      <Stack className="bg-slate-800 text-white">
+      <StatusBar style="dark" translucent backgroundColor="#1e293b" />
+      <Stack className="flex-1 bg-slate-800 text-white">
         <Stack.Screen
           name="index"
           options={{
             headerShown: false,
+            headerTransparent: true,
+            translucent: true,
             statusBarColor: "#1e293b",
             navigationBarColor: "#1e293b",
             contentStyle: {

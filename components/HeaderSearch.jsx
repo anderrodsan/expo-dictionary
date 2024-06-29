@@ -54,7 +54,7 @@ export default function HeaderSearch({
   );
 
   return (
-    <View className="flex w-full px-5">
+    <View className="flex w-full px-5 ">
       {openSearch ? (
         <View className="flex-row justify-between items-center w-full space-x-3 pt-4">
           {/** Back Button */}

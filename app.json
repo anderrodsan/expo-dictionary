@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "wordwise",
+    "name": "WordWise",
     "displayName": "WordWise",
     "slug": "wordwise",
     "scheme": "sora",
-    "description": "A word learning app",
+    "description": "A vocabulary learning app",
     "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,7 +12,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0f172a"
+      "backgroundColor": "#1e293b"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
@@ -20,8 +20,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0f172a"
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#1e293b"
       },
       "package": "com.jsm.sora"
     },
