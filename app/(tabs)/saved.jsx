@@ -7,6 +7,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  VirtualizedList,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -23,6 +24,13 @@ import { Link, router } from "expo-router";
 import SavedCategory from "../../components/SavedCategory";
 import HeaderSearch from "../../components/HeaderSearch";
 import { useLang, useLanguageList } from "../../lib/store/store";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import GroupDrawer from "../../components/GroupDrawer";
+import GroupSection from "../../components/GroupSection";
 
 export default function Saved() {
   const [savedWords, setSavedWords] = useState([]);
@@ -38,9 +46,17 @@ export default function Saved() {
   //hide all the translations
   const [hide, setHide] = useState(false);
 
+  //sort alphabetically
+  const [sort, setSort] = useState(false);
+  const [group, setGroup] = useState(null);
+
+  //multi select the word item id's to manage them together
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [multiSelect, setMultiSelect] = useState(false);
+
   useEffect(() => {
     handleRefresh();
-  }, [category, lang]);
+  }, [category, lang, sort, group]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -52,9 +68,19 @@ export default function Saved() {
       setLangList(getLanguageList(savedWords));
       //console.log("languages", languages);
 
+      const sortedWords = sort
+        ? savedWords?.sort((a, b) => a.lang1.localeCompare(b.lang1, lang))
+        : savedWords;
+
       //filter the words that include word.lang === lang
-      const filteredByLang = savedWords?.filter((item) => item.lang === lang);
+      const filteredByLang = sortedWords?.filter((item) => item.lang === lang);
       setSavedWords(filteredByLang);
+
+      /*filter the words based on the group
+      const filteredByGroup = group
+        ? filteredByLang?.filter((item) => item.tag === group)
+        : filteredByLang;
+      */
 
       if (category === "All") {
         setFilteredWords(filteredByLang);
@@ -67,7 +93,7 @@ export default function Saved() {
           setFilteredWords(filteredWords);
         } else {
           //filter the words that have the status == filteredStatus and avoid repeating the last word
-          const filteredWords = filteredByLang?.filter(
+          const filteredWords = filteredByGroup?.filter(
             (item) => item.status === category
           );
           setFilteredWords(filteredWords);
@@ -76,6 +102,8 @@ export default function Saved() {
       setRefreshing(false);
     });
   };
+
+  //when  navigation back button is pressed setMultiSelect = false
 
   // Memoized renderItem function
   const renderItem = useCallback(
@@ -87,10 +115,33 @@ export default function Saved() {
         hide={hide}
         index={index}
         lang={lang}
+        sort={sort}
+        /*multiSelect={multiSelect}
+        setMultiSelect={setMultiSelect}
+        selectedItems={selectedItems}
+        setSelectedItems={setSelectedItems}
+        */
       />
     ),
-    [filteredWords, hide, lang]
+    [filteredWords, hide, lang, multiSelect, selectedItems]
   );
+
+  //detect scroll down and hide the header, scroll up and show the header
+  const [isHidden, setIsHidden] = useState(false);
+
+  const onScroll = (event) => {
+    const scrollOffset = event.nativeEvent.contentOffset.y;
+
+    if (scrollOffset > 20) {
+      setIsHidden(true);
+    } else {
+      setIsHidden(false);
+    }
+    //console.log(scrollOffset);
+  };
+
+  //scroll to top
+  const flatListRef = React.useRef();
 
   return (
     <View className="bg-slate-800 flex-1 flex-col justify-start items-center">
@@ -102,6 +153,8 @@ export default function Saved() {
         langList={langList}
         lang={lang}
         setLang={setLang}
+        sort={sort}
+        setSort={setSort}
       />
       {/** Add Tag Filter */}
       <SavedCategory
@@ -111,23 +164,45 @@ export default function Saved() {
       />
 
       {/** Word List */}
-      <View className="w-full pl-5 pb-[120px] pt-2">
+      <View className="relative w-full pb-[120px] pt-2">
+        {/** Scroll to top button */}
+        {filteredWords && isHidden && (
+          <TouchableOpacity
+            onPress={() =>
+              flatListRef.current.scrollToOffset({ animated: true, offset: 0 })
+            }
+            className="absolute bottom-36 right-5 z-40 bg-blue-500/50 rounded-full p-2"
+          >
+            <MaterialCommunityIcons
+              name="chevron-double-up"
+              size={24}
+              color="white"
+            />
+          </TouchableOpacity>
+        )}
+
+        {/** Add folders in an horizontal scroll 
+        <GroupSection isHidden={isHidden} group={group} setGroup={setGroup} />*/}
+
         {refreshing ? (
           <View className="flex h-full w-full pr-5 justify-center items-center opacity-50">
             <ActivityIndicator size={30} color="#3b82f6" />
           </View>
         ) : (
-          <FlatList
+          <VirtualizedList
+            ref={flatListRef}
             data={filteredWords}
             keyExtractor={(item) => item?.lang1}
-            className="pb-10"
+            className="pb-10 pl-5"
+            getItemCount={() => filteredWords?.length || 0}
+            getItem={(_, index) => filteredWords?.[index]}
             renderItem={renderItem}
             ListEmptyComponent={
               <Pressable
                 onPress={() => router.push("(tabs)/home")}
-                className="mr-5 bg-slate-700 rounded-xl p-5 flex justify-center items-center text-slate-300 font-bold"
+                className="mt-24 mr-5 bg-slate-700/50 rounded-xl p-5 flex justify-center items-center text-slate-300 font-bold"
               >
-                <Text className="text-xl text-white">Start Saving Words</Text>
+                <Text className="text-white opacity-80">No results</Text>
               </Pressable>
             }
             refreshing={refreshing}
@@ -141,6 +216,7 @@ export default function Saved() {
                 </View>
               ) : null
             }
+            onScroll={onScroll}
           />
         )}
       </View>

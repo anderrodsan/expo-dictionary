@@ -59,7 +59,7 @@ export default function OptionsDrawer({
           text={word.lang1}
           lang={lang}
           size={24}
-          autoplay={true}
+          autoplay={false}
         />
       </View>
 
@@ -119,7 +119,7 @@ export default function OptionsDrawer({
           onPress={() => {
             handleRemove(word);
           }}
-          className="w-full rounded-xl bg-slate-600/50 py-2 flex-row justify-start px-3 items-center space-x-2 opacity-90 mt-3 mb-5"
+          className="w-full rounded-xl bg-red-500/50 py-2 flex-row justify-start px-3 items-center space-x-2 opacity-90 mt-3 mb-5"
         >
           <MaterialCommunityIcons
             name="delete-outline"

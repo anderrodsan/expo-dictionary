@@ -28,6 +28,7 @@ const PastWords = ({ latestWord, setLatestWord }) => {
   const opacity = useSharedValue(0);
   const position = useSharedValue(50);
 
+  //Animation
   useEffect(() => {
     opacity.value = 0;
     position.value = 50;

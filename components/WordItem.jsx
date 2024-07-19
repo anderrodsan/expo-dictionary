@@ -20,11 +20,24 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-const WordItem = ({ item, index, savedWords, handleRefresh, hide, lang }) => {
+const WordItem = ({
+  item,
+  index,
+  savedWords,
+  handleRefresh,
+  hide,
+  lang,
+  sort,
+  selectedItems,
+  setSelectedItems,
+  multiSelect,
+  setMultiSelect,
+}) => {
   const [word, setWord] = useState(item);
   const [show, setShow] = useState(false);
   const [edit, setEdit] = useState(false);
   const [showTranslation, setShowTranslation] = useState(false);
+  const [selected, setSelected] = useState(false);
 
   useEffect(() => {
     setShowTranslation(!hide);
@@ -81,6 +94,18 @@ const WordItem = ({ item, index, savedWords, handleRefresh, hide, lang }) => {
     ) : null;
   }, [item.date, index, savedWords]);
 
+  //Show the words first letter for the sorted list without repeating them, as the date
+  const firstLetter = useMemo(() => {
+    return index === 0 ||
+      savedWords[index - 1].lang1.charAt(0) !== item.lang1.charAt(0) ? (
+      <View className={`text-xs mb-1 flex flex-row space-x-1 py-1`}>
+        <Text className="text-blue-500 font-bold">
+          {item.lang1.charAt(0).toUpperCase()}
+        </Text>
+      </View>
+    ) : null;
+  });
+
   const translationStatusTag = useMemo(() => {
     return item.status !== "Easy" ? (
       <Pressable
@@ -128,18 +153,51 @@ const WordItem = ({ item, index, savedWords, handleRefresh, hide, lang }) => {
   }, [item.type]);
 
   return (
-    <View className="relative">
-      {dateLabel}
+    <View className={`relative ${index === 0 && "mt-0"}`}>
+      {sort ? firstLetter : dateLabel}
 
       <View
         className={`flex flex-row justify-between items-center p-3 mr-5 rounded-xl mb-2 border ${
           item.fav ? "border-blue-500/80" : "border-slate-700"
-        }`}
+        }
+        
+        `}
       >
-        <Pressable
+        <TouchableOpacity
+          activeOpacity={hide ? 0.75 : 1}
           onPress={() => {
             if (hide) setShowTranslation(!showTranslation);
+            /*
+            if (multiSelect) {
+              setSelected(!selected);
+              if (selectedItems.includes(item)) {
+                if (selectedItems.length === 1) {
+                  setMultiSelect(false);
+                }
+                setSelectedItems(selectedItems.filter((w) => w !== item));
+              } else {
+                setSelectedItems([...selectedItems, item]);
+              }
+            }
+              */
           }}
+          /*
+          onLongPress={() => {
+            if (!multiSelect) {
+              setSelectedItems([item]);
+              setSelected(true);
+              setMultiSelect(true);
+            } else {
+              setSelected(!selected);
+              if (selectedItems.includes(item)) {
+                setSelectedItems(selectedItems.filter((w) => w !== item));
+              } else {
+                setSelectedItems([...selectedItems, item]);
+              }
+            }
+            console.log("Mult select", multiSelect);
+          }}
+            */
           className="flex-1 flex-col items-start justify-center"
         >
           <View className="flex-1 flex-row justify-start items-center space-x-2">
@@ -166,10 +224,12 @@ const WordItem = ({ item, index, savedWords, handleRefresh, hide, lang }) => {
             </Animated.Text>
             {typeView}
           </View>
-        </Pressable>
+        </TouchableOpacity>
 
         <View
-          className={`absolute right-0 h-full flex-row items-center bg-slate-800 z-40 py-3 pr-2`}
+          className={`absolute right-0 h-full flex-row items-center z-40 py-3 pr-2 ${
+            !selected && "bg-slate-800"
+          }`}
         >
           {item.fav && (
             <TouchableOpacity

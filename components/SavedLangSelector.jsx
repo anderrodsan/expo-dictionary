@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Drawer from "./Drawer";
 import { findLanguage } from "../data/languageOptions";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function SavedLangSelector({
   openDrawer,
@@ -45,10 +45,15 @@ export default function SavedLangSelector({
                   setOpenDrawer(false);
                 }}
                 className={`w-full flex-row items-center justify-between p-3 my-1 rounded-lg ${
-                  lang === language?.value ? "bg-blue-500" : "bg-slate-600/40"
+                  lang === language?.value
+                    ? "bg-blue-500/50"
+                    : "bg-slate-600/40"
                 }`}
               >
-                <Text className="text-white text-start opacity-90">
+                <View className="opacity-70">
+                  <Ionicons name="language" size={20} color="white" />
+                </View>
+                <Text className="flex-1 ml-2 text-white text-start opacity-90">
                   {language?.name}
                 </Text>
                 <Text className="text-white text-start opacity-50">

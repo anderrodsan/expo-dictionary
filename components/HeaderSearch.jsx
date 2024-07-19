@@ -27,6 +27,8 @@ export default function HeaderSearch({
   langList,
   lang,
   setLang,
+  sort,
+  setSort,
 }) {
   const [openSearch, setOpenSearch] = React.useState(false);
   const [openDrawer, setOpenDrawer] = React.useState(false);
@@ -110,22 +112,29 @@ export default function HeaderSearch({
               onPress={() => setHide(!hide)}
               activeOpacity={0.75}
               className={`px-2 py-1 rounded-lg mr-2 ${
-                hide ? "bg-blue-500" : "bg-slate-700"
+                hide ? "bg-blue-500/70" : "bg-slate-700"
               }`}
             >
-              {hide ? (
-                <MaterialCommunityIcons
-                  name="eye-off-outline"
-                  size={20}
-                  color="white"
-                />
-              ) : (
-                <MaterialCommunityIcons
-                  name="eye-outline"
-                  size={20}
-                  color="white"
-                />
-              )}
+              <MaterialCommunityIcons
+                name="eye-off-outline"
+                size={20}
+                color="white"
+              />
+            </TouchableOpacity>
+
+            {/** Hide translations button */}
+            <TouchableOpacity
+              onPress={() => setSort(!sort)}
+              activeOpacity={0.75}
+              className={`px-2 py-1 rounded-lg mr-2 ${
+                sort ? "bg-blue-500/70" : "bg-slate-700"
+              }`}
+            >
+              <MaterialCommunityIcons
+                name="order-alphabetical-ascending"
+                size={20}
+                color="white"
+              />
             </TouchableOpacity>
 
             {/** Select Language */}

@@ -4,7 +4,7 @@ import { Linking, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useLang, useLanguageList } from "../lib/store/store";
+import { useLang, useLanguageList, useStore } from "../lib/store/store";
 import { fetchSavedWords, getLanguageList } from "../data/actions";
 import { findLanguage } from "../data/languageOptions";
 import LanguageSelector from "../components/LanguageSelector";
@@ -20,11 +20,12 @@ export default function Page() {
   //zuztand global state for languages
   const { langList, setLangList } = useLanguageList();
   const { lang, setLang } = useLang();
+  const { setWordList } = useStore();
 
   useEffect(() => {
     //fetch saved words at the begining
     fetchSavedWords().then((savedWords) => {
-      //setWordList(savedWords);
+      setWordList(savedWords);
       //save the language list in the useStore state from zuztand
       if (savedWords?.length > 0) {
         const langList = getLanguageList(savedWords);
