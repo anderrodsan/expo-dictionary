@@ -32,9 +32,12 @@ export const fetchNewWord = async ({ data, filteredStatus }) => {
       //console.log("data", data);
       //const savedWords = JSON.parse(data).reverse();
 
-      //filter the words that have the status == filteredStatus and avoid repeating the last word
       const filteredWords =
-        data.filter((item) => item.status === filteredStatus) || [];
+        filteredStatus === "All"
+          ? data
+          : filteredStatus === "fav"
+          ? data.filter((item) => item.fav === true)
+          : data.filter((item) => item.status === filteredStatus);
 
       //select a random item from filteredWord
       const randomIndex = Math.floor(Math.random() * filteredWords.length);
@@ -45,6 +48,35 @@ export const fetchNewWord = async ({ data, filteredStatus }) => {
     console.error("Error fetching saved words:", error);
   }
 };
+
+//fetch a random word based on the status (the probability of showing a word is based on its status high > medium > low)
+function getRandomWord({ words }) {
+  //select a random number between 0 to 10
+  const randomNumber = Math.floor(Math.random() * 10);
+
+  //percenteges of each status 50% Hard, 40% Medium, 10% Easy
+
+  if (randomNumber < 5) {
+    const hardWords = words.find((word) => word.status === "High");
+    //get a random word from the array
+    const randomIndex = Math.floor(Math.random() * hardWords.length);
+    const randomWord = hardWords[randomIndex];
+
+    return randomWord;
+  } else if (randomNumber < 9) {
+    const mediumWords = words.find((word) => word.status === "Medium");
+    const randomIndex = Math.floor(Math.random() * mediumWords.length);
+    const randomWord = mediumWords[randomIndex];
+
+    return randomWord;
+  } else {
+    const easyWords = words.find((word) => word.status === "Easy");
+    const randomIndex = Math.floor(Math.random() * easyWords.length);
+    const randomWord = easyWords[randomIndex];
+
+    return randomWord;
+  }
+}
 
 //add word to savedWords
 export const saveWord = async ({ text, tag, lang1, lang2, swap }) => {

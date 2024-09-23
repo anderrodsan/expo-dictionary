@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Foundation, MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   fetchNewWord,
   fetchSavedWords,
@@ -26,6 +26,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import SavedCategory from "../../components/SavedCategory";
 
 const FlashCards = () => {
   //open the drawer and show the word
@@ -45,7 +46,7 @@ const FlashCards = () => {
   //displayed word, wordlist and status filter
   const [word, setWord] = useState(null);
   const [savedWords, setSavedWords] = useState([]);
-  const [filteredStatus, setFilteredStatus] = useState("new");
+  const [filteredStatus, setFilteredStatus] = useState("All");
 
   //Animation for opacity
   const opacity = useSharedValue(0);
@@ -86,10 +87,8 @@ const FlashCards = () => {
   // update word difficulty
   const handleUpdate = (status) => {
     // change the word.status with the new status value
-    word.status = status;
-    console.log(word);
-
-    updateWord({ word });
+    const updatedWord = { ...word, status: status };
+    updateWord({ word: updatedWord });
     getNewWord();
     setShow(false);
   };
@@ -119,18 +118,16 @@ const FlashCards = () => {
       });
       setShow(false);
       setLoading(false);
-      if (!word) {
-        setFilteredStatus("Medium");
+      if (!word && filteredStatus !== "All") {
+        setFilteredStatus("All");
       }
     });
   };
 
   const handleFavorite = (word) => {
-    //add new value pair fav: true or false
-    word.fav = word.fav ? !word.fav : true;
-    updateWord({ word }).then(() => {
-      getNewWord();
-    });
+    const updatedWord = { ...word, fav: !word.fav };
+    setWord(updatedWord);
+    updateWord({ word: updatedWord });
   };
 
   return (
@@ -152,12 +149,13 @@ const FlashCards = () => {
       </View>
 
       {/** Category Selector */}
-      <SelectCategory
-        statuses={statuses}
-        filteredStatus={filteredStatus}
-        setFilteredStatus={setFilteredStatus}
-        savedWords={savedWords}
-      />
+      <View className="w-full pb-4">
+        <SavedCategory
+          category={filteredStatus}
+          setCategory={setFilteredStatus}
+          savedWords={savedWords}
+        />
+      </View>
 
       {/** Word Card */}
       <View className="flex-1 w-full px-5 pb-5">
@@ -197,6 +195,7 @@ const FlashCards = () => {
               {show && !loading ? (
                 <Animated.View style={animatedStyle}>
                   <DifficultyButtons
+                    word={word}
                     statuses={statuses}
                     handleUpdate={handleUpdate}
                   />
@@ -331,7 +330,7 @@ function FavButton({ word, handleFavorite }) {
 }
 
 //Difficulty buttons
-function DifficultyButtons({ statuses, handleUpdate }) {
+function DifficultyButtons({ word, statuses, handleUpdate }) {
   return (
     <View className="flex flex-row items-center justify-center w-full pb-10 px-5">
       {/** Difficulty Buttons */}
@@ -344,9 +343,21 @@ function DifficultyButtons({ statuses, handleUpdate }) {
           className={`w-1/3 px-2`}
         >
           <View
-            className={`text-white text-center rounded-full w-full py-1 ${status.color}`}
+            className={`text-white text-center rounded-full w-full py-1 ${
+              status.color
+            } ${
+              status.name === word.status
+                ? "opacity-100 border border-slate-600"
+                : "opacity-80"
+            }`}
           >
-            <Text className={`text-white text-center`}>{status.name}</Text>
+            <Text
+              className={`text-white text-center ${
+                status.name === word.status && "font-semibold"
+              }`}
+            >
+              {status.name}
+            </Text>
           </View>
         </TouchableOpacity>
       ))}
@@ -375,15 +386,31 @@ function EmptyList({}) {
 function PrimaryWord({ word, swap, lang }) {
   return (
     <View className="flex-col items-center justify-center pt-20 pb-10">
-      {/* Add Tag */}
-      {word.tag && (
+      <View className="flex flex-row items-center gap-2">
+        {/* Add Tag */}
+        {word.tag && (
+          <View
+            className={`flex flex-row items-center space-x-2 rounded-full px-3 py-1 border border-slate-500`}
+          >
+            <Ionicons name="pricetag" size={13} color="#94a3b8" />
+            <Text className="text-white text-xs">{word.tag}</Text>
+          </View>
+        )}
         <View
-          className={`flex flex-row items-center space-x-2 rounded-full px-3 py-1 border border-slate-500`}
+          className={`rounded-full
+        ${word.status === "Hard" && "bg-blue-700 h-3 w-3"}
+        ${word.status === "Medium" && "bg-orange-500 h-3 w-3"}
+        ${word.status === "Easy" && "bg-slate-500 h-3 w-3"}
+        `}
+          onPress={() => setShow(true)}
         >
-          <Ionicons name="pricetag" size={13} color="#94a3b8" />
-          <Text className="text-white text-xs">{word.tag}</Text>
+          {word.status === "new" && (
+            <View className="">
+              <Foundation name="burst-new" size={22} color="#3b82f6" />
+            </View>
+          )}
         </View>
-      )}
+      </View>
       <Text className="font-bold text-white text-center text-3xl pt-5 pb-3">
         {swap ? word.lang2 : word.lang1}
       </Text>

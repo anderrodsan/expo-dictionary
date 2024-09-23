@@ -11,16 +11,16 @@ export default function SavedCategory({ category, setCategory, savedWords }) {
       icon: "format-list-bulleted",
     },
     {
-      name: "Liked",
-      value: "fav",
-      color: "slate-500",
-      icon: "cards-heart-outline",
-    },
-    {
       name: "New",
       value: "new",
       color: "blue-500",
       icon: "plus-circle-outline",
+    },
+    {
+      name: "Liked",
+      value: "fav",
+      color: "slate-500",
+      icon: "cards-heart-outline",
     },
     {
       name: "Easy",
@@ -47,7 +47,7 @@ export default function SavedCategory({ category, setCategory, savedWords }) {
   }
 
   return (
-    <View className="w-full py-4 border-b border-slate-700">
+    <View className="w-full">
       <FlatList
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -61,8 +61,8 @@ export default function SavedCategory({ category, setCategory, savedWords }) {
                 : "border border-slate-700"
             } 
               ${index === 0 && "ml-5"}
-              ${index === options.length - 1 && "mr-5"}
-              rounded-full mr-2`}
+              ${index === options.length - 1 ? "mr-5" : "mr-2"}
+              rounded-full`}
           >
             <View className="flex-row px-2 py-1 items-center">
               <MaterialCommunityIcons

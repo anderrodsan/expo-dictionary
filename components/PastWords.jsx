@@ -8,13 +8,10 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Link } from "expo-router";
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import EditWord from "./EditWord";
 import SpeechComponent from "./Speech";
-import { removeWord } from "../data/actions";
+import { removeWord, updateWord } from "../data/actions";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -46,7 +43,7 @@ const PastWords = ({ latestWord, setLatestWord }) => {
   return (
     <Animated.View
       style={animatedStyle}
-      className="flex flex-col items-center w-full p-5 mb-10"
+      className="relative flex flex-col items-center w-full p-5 mb-10"
     >
       <Text className="text-slate-500 text-lg font-bold pb-3">Result</Text>
       <View className="flex flex-col items-center justify-between w-full py-3 px-10 rounded-xl bg-slate-700/30">
@@ -58,38 +55,13 @@ const PastWords = ({ latestWord, setLatestWord }) => {
           {latestWord.lang2}
         </Text>
 
-        <View className="absolute bottom-3 right-3 flex-row space-x-2 items-center">
-          <SpeechComponent
-            text={latestWord.lang1}
-            lang={latestWord.lang}
-            size={24}
-            autoplay={true}
-          />
-          {/**Edit button */}
-          <TouchableOpacity
-            activeOpacity={0.75}
-            onPress={() => setVisible(true)}
-          >
-            <MaterialCommunityIcons name="pencil" size={20} color="#94a3b8" />
-          </TouchableOpacity>
-          {/** Save button */}
-          <TouchableOpacity
-            activeOpacity={0.75}
-            onPress={() => {
-              console.log("removeWord", latestWord);
-              removeWord({ word: latestWord }).then(() => {
-                setLatestWord(null);
-              });
-            }}
-          >
-            <MaterialCommunityIcons
-              name="delete-outline"
-              size={20}
-              color="#94a3b8"
-            />
-          </TouchableOpacity>
-        </View>
+        <Options
+          latestWord={latestWord}
+          setLatestWord={setLatestWord}
+          setVisible={setVisible}
+        />
       </View>
+
       <EditWord word={latestWord} visible={visible} setVisible={setVisible} />
     </Animated.View>
   );
@@ -97,4 +69,77 @@ const PastWords = ({ latestWord, setLatestWord }) => {
 
 export default PastWords;
 
-const styles = StyleSheet.create({});
+function Tag({ tag }) {
+  return (
+    <View className="flex-1 flex-row justify-start">
+      <View
+        className={"flex-row items-center space-x-2 rounded-full opacity-70"}
+      >
+        {tag && (
+          <>
+            <Ionicons name="pricetag" size={16} color="#94a3b8" />
+            <Text className="text-slate-300 text-sm">{tag.slice(0, 20)}</Text>
+          </>
+        )}
+      </View>
+    </View>
+  );
+}
+
+function Options({ latestWord, setLatestWord, setVisible }) {
+  function handleFavorite({ word }) {
+    // Create a new word object with the updated favorite status
+    const updatedWord = { ...word, fav: !word.fav };
+    setLatestWord(updatedWord);
+    console.log("updatedWord", updatedWord);
+    updateWord({ word: updatedWord });
+  }
+
+  return (
+    <View className="absolute bottom-3 right-5 left-5 flex-row justify-between items-center gap-1">
+      <Tag tag={latestWord?.tag} />
+      <SpeechComponent
+        text={latestWord.lang1}
+        lang={latestWord.lang}
+        size={24}
+        autoplay={true}
+      />
+      {/**Edit button */}
+      <TouchableOpacity activeOpacity={0.75} onPress={() => setVisible(true)}>
+        <MaterialCommunityIcons name="pencil" size={20} color="#94a3b8" />
+      </TouchableOpacity>
+
+      {/**Favorite button */}
+      <TouchableOpacity
+        activeOpacity={0.75}
+        onPress={() => {
+          console.log("handleFavorite", latestWord);
+          handleFavorite({ word: latestWord });
+        }}
+      >
+        <MaterialCommunityIcons
+          name={latestWord?.fav ? "cards-heart" : "cards-heart-outline"}
+          size={20}
+          color={latestWord?.fav ? "#3b82f6" : "#94a3b8"}
+        />
+      </TouchableOpacity>
+
+      {/** Delete button */}
+      <TouchableOpacity
+        activeOpacity={0.75}
+        onPress={() => {
+          console.log("removeWord", latestWord);
+          removeWord({ word: latestWord }).then(() => {
+            setLatestWord(null);
+          });
+        }}
+      >
+        <MaterialCommunityIcons
+          name="delete-outline"
+          size={20}
+          color="#94a3b8"
+        />
+      </TouchableOpacity>
+    </View>
+  );
+}

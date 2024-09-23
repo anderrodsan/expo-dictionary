@@ -4,7 +4,7 @@ import { Linking, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useLang, useLanguageList, useStore } from "../lib/store/store";
+import { useLang, useLanguageList, useWordList } from "../lib/store/store";
 import { fetchSavedWords, getLanguageList } from "../data/actions";
 import { findLanguage } from "../data/languageOptions";
 import LanguageSelector from "../components/LanguageSelector";
@@ -20,7 +20,7 @@ export default function Page() {
   //zuztand global state for languages
   const { langList, setLangList } = useLanguageList();
   const { lang, setLang } = useLang();
-  const { setWordList } = useStore();
+  const { setWordList } = useWordList();
 
   useEffect(() => {
     //fetch saved words at the begining
@@ -33,6 +33,7 @@ export default function Page() {
         setLangList(langList);
       } else {
         setLangList([]);
+        setLang("da");
       }
     });
 
@@ -69,6 +70,12 @@ export default function Page() {
 
   return (
     <SafeAreaView className="relative flex-1 items-center justify-center bg-slate-800 text-white">
+      <View className="absolute top-6 right-3 opacity-20">
+        {/** Back to index */}
+        <Link href={"/(tabs)/home"}>
+          <Ionicons name="chevron-forward" size={24} color="white" />
+        </Link>
+      </View>
       <Animated.View
         style={animatedOpacity}
         className="flex flex-col items-center justify-center gap-3 w-full p-10 scale-150"
@@ -86,8 +93,8 @@ export default function Page() {
         Select Language
       </Animated.Text>
 
-      {/** Language selector */}
-      {langList?.length > 0 ? (
+      {/** Language selector with the saved languages */}
+      {langList?.length > 0 && (
         <Animated.View
           style={animatedWithTransition}
           className="flex-row justify-center items-center flex-wrap w-full px-5"
@@ -118,7 +125,7 @@ export default function Page() {
               </Pressable>
             );
           })}
-
+          {/** Display the rest of the languages if the list is more than 3 */}
           <Pressable
             className="w-1/2 px-2 py-1 rounded-xl bg-blue-500/50 m-1 flex-row items-center justify-center space-x-1"
             onPress={() => {
@@ -133,7 +140,13 @@ export default function Page() {
             </Text>
           </Pressable>
         </Animated.View>
-      ) : (
+      )}
+
+      {/** Get started button if there's no saved languages */}
+      {(langList?.length === 0 ||
+        langList === null ||
+        langList === undefined ||
+        langList === "") && (
         <Animated.View style={animatedWithTransition}>
           <Pressable
             onPress={() => {
@@ -147,6 +160,7 @@ export default function Page() {
           </Pressable>
         </Animated.View>
       )}
+
       <Animated.View
         style={animatedWithTransition}
         className="absolute bottom-10 justify-center items-center space-y-3"

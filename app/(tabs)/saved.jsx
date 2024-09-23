@@ -93,7 +93,7 @@ export default function Saved() {
           setFilteredWords(filteredWords);
         } else {
           //filter the words that have the status == filteredStatus and avoid repeating the last word
-          const filteredWords = filteredByGroup?.filter(
+          const filteredWords = filteredByLang?.filter(
             (item) => item.status === category
           );
           setFilteredWords(filteredWords);
@@ -132,7 +132,7 @@ export default function Saved() {
   const onScroll = (event) => {
     const scrollOffset = event.nativeEvent.contentOffset.y;
 
-    if (scrollOffset > 20) {
+    if (scrollOffset > 50) {
       setIsHidden(true);
     } else {
       setIsHidden(false);
@@ -157,28 +157,35 @@ export default function Saved() {
         setSort={setSort}
       />
       {/** Add Tag Filter */}
-      <SavedCategory
-        category={category}
-        setCategory={setCategory}
-        savedWords={savedWords}
-      />
+      <View className="w-full py-4 border-b border-slate-700">
+        <SavedCategory
+          category={category}
+          setCategory={setCategory}
+          savedWords={savedWords}
+        />
+      </View>
 
       {/** Word List */}
       <View className="relative w-full pb-[120px] pt-2">
         {/** Scroll to top button */}
         {filteredWords && isHidden && (
-          <TouchableOpacity
-            onPress={() =>
-              flatListRef.current.scrollToOffset({ animated: true, offset: 0 })
-            }
-            className="absolute bottom-36 right-5 z-40 bg-blue-500/50 rounded-full p-2"
-          >
-            <MaterialCommunityIcons
-              name="chevron-double-up"
-              size={24}
-              color="white"
-            />
-          </TouchableOpacity>
+          <View className="absolute bottom-32 left-0 w-full flex-row justify-center z-40">
+            <TouchableOpacity
+              onPress={() =>
+                flatListRef.current.scrollToOffset({
+                  animated: true,
+                  offset: 0,
+                })
+              }
+              className="bg-blue-500/70 rounded-full p-2"
+            >
+              <MaterialCommunityIcons
+                name="chevron-double-up"
+                size={24}
+                color="white"
+              />
+            </TouchableOpacity>
+          </View>
         )}
 
         {/** Add folders in an horizontal scroll 

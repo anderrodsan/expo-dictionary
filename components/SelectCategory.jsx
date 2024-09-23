@@ -1,18 +1,38 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import React from "react";
 
-const SelectCategory = ({
-  statuses,
-  filteredStatus,
-  setFilteredStatus,
-  savedWords,
-}) => {
+const SelectCategory = ({ filteredStatus, setFilteredStatus, savedWords }) => {
+  const statuses = [
+    {
+      name: "All",
+      color: "border border-slate-500 bg-blue-500",
+    },
+    {
+      name: "New",
+      color: "border border-slate-500 bg-slate-500",
+    },
+    {
+      name: "Medium",
+      color: "bg-orange-600",
+    },
+    {
+      name: "Hard",
+      color: "bg-blue-700",
+    },
+  ];
+
   return (
-    <View className="flex flex-row items-center justify-center space-x-2 w-full pb-3">
+    <ScrollView horizontal className="w-full pb-3">
       <TouchableOpacity
         title="difficulty"
         activeOpacity={0.75}
-        onPress={() => setFilteredStatus("new")}
+        onPress={() => setFilteredStatus("All")}
         className={`rounded-full px-3 py-1 border ${
           filteredStatus === "new"
             ? "bg-blue-500 border-blue-500"
@@ -20,17 +40,13 @@ const SelectCategory = ({
         }`}
       >
         <Text className="text-white text-xs text-center">
-          New ({savedWords.filter((word) => word.status === "new").length})
+          All ({savedWords.length})
         </Text>
       </TouchableOpacity>
       {statuses.map((status) => {
         const wordCount = savedWords.filter(
-          (word) => word.status === status.name
+          (word) => word.status.toLowerCase() === status.name.toLowerCase()
         );
-
-        if (status.name === "Easy") {
-          return null;
-        }
 
         return (
           <TouchableOpacity
@@ -52,10 +68,8 @@ const SelectCategory = ({
           </TouchableOpacity>
         );
       })}
-    </View>
+    </ScrollView>
   );
 };
 
 export default SelectCategory;
-
-const styles = StyleSheet.create({});

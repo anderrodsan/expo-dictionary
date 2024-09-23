@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 // store the wordlist
-export const useStore = create((set) => ({
+export const useWordList = create((set) => ({
   wordList: [],
   setWordList: (wordList) => set({ wordList }),
   //add new word to the wordlist

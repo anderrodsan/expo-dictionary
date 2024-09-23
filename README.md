@@ -71,3 +71,9 @@ module.exports = function (api) {
 ```bash
 npx eas update
 ```
+
+### to build for Android (.apk)
+
+```bash
+npx eas build -p android --profile preview
+```
