@@ -15,6 +15,7 @@ import { removeWord, updateWord } from "../data/actions";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
 
@@ -23,20 +24,23 @@ const PastWords = ({ latestWord, setLatestWord }) => {
 
   const [visible, setVisible] = useState(false);
   const opacity = useSharedValue(0);
-  const position = useSharedValue(50);
+  const scale = useSharedValue(50);
 
   //Animation
   useEffect(() => {
     opacity.value = 0;
-    position.value = 50;
+    scale.value = 0;
     opacity.value = withTiming(1, { duration: 600 });
-    position.value = withTiming(0, { duration: 300 });
-  }, [latestWord]);
+    scale.value = withSpring(1, {
+      damping: 20,
+      stiffness: 100,
+    });
+  }, [latestWord, !latestWord?.fav]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
       opacity: opacity.value,
-      transform: [{ translateY: position.value }],
+      transform: [{ scale: scale.value }],
     };
   });
 
@@ -46,7 +50,11 @@ const PastWords = ({ latestWord, setLatestWord }) => {
       className="relative flex flex-col items-center w-full p-5 mb-10"
     >
       <Text className="text-slate-500 text-lg font-bold pb-3">Result</Text>
-      <View className="flex flex-col items-center justify-between w-full py-3 px-10 rounded-xl bg-slate-700/30">
+      <View
+        className={`flex flex-col items-center justify-between w-full py-3 px-10 rounded-xl bg-slate-700/30 ${
+          latestWord.fav && "border border-blue-500"
+        }`}
+      >
         <Text className="font-bold text-white text-center text-2xl">
           {latestWord.lang1}
         </Text>

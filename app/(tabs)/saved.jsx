@@ -25,6 +25,8 @@ import SavedCategory from "../../components/SavedCategory";
 import HeaderSearch from "../../components/HeaderSearch";
 import { useLang, useLanguageList } from "../../lib/store/store";
 import Animated, {
+  SlideInDown,
+  SlideOutDown,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -62,45 +64,30 @@ export default function Saved() {
     setRefreshing(true);
     setLoadingMore(true);
 
-    //fetch saved words from async storage
-    fetchSavedWords().then((savedWords) => {
-      //each item on the list has the lang: "da" || "en" || ... value pair, detect which different languages exist on the list
-      setLangList(getLanguageList(savedWords));
-      //console.log("languages", languages);
+    //fetch saved words
+    const savedWords = await fetchSavedWords();
 
-      const sortedWords = sort
-        ? savedWords?.sort((a, b) => a.lang1.localeCompare(b.lang1, lang))
-        : savedWords;
+    //filter the words that include word.lang === lang
+    const filteredByLang = savedWords.filter((item) => item.lang === lang);
 
-      //filter the words that include word.lang === lang
-      const filteredByLang = sortedWords?.filter((item) => item.lang === lang);
-      setSavedWords(filteredByLang);
+    //sort the words alphabetically
+    const sortedWords = sort
+      ? filteredByLang.sort((a, b) => a.lang1.localeCompare(b.lang1, lang))
+      : filteredByLang;
 
-      /*filter the words based on the group
-      const filteredByGroup = group
-        ? filteredByLang?.filter((item) => item.tag === group)
-        : filteredByLang;
-      */
+    //sort by category
+    const finalFilteredWords =
+      category === "All"
+        ? sortedWords
+        : category === "fav"
+        ? sortedWords.filter((item) => item.fav === true)
+        : sortedWords.filter((item) => item.status === category);
 
-      if (category === "All") {
-        setFilteredWords(filteredByLang);
-      } else {
-        if (category === "fav") {
-          //filter the words that have the fav == true
-          const filteredWords = filteredByLang?.filter(
-            (item) => item.fav === true
-          );
-          setFilteredWords(filteredWords);
-        } else {
-          //filter the words that have the status == filteredStatus and avoid repeating the last word
-          const filteredWords = filteredByLang?.filter(
-            (item) => item.status === category
-          );
-          setFilteredWords(filteredWords);
-        }
-      }
-      setRefreshing(false);
-    });
+    //update the states
+    setSavedWords(savedWords);
+    setFilteredWords(finalFilteredWords);
+    setLangList(getLanguageList(savedWords)); // Set language list after filtering
+    setRefreshing(false);
   };
 
   //when  navigation back button is pressed setMultiSelect = false
@@ -116,6 +103,7 @@ export default function Saved() {
         index={index}
         lang={lang}
         sort={sort}
+        viewableItems={viewableItems}
         /*multiSelect={multiSelect}
         setMultiSelect={setMultiSelect}
         selectedItems={selectedItems}
@@ -123,7 +111,7 @@ export default function Saved() {
         */
       />
     ),
-    [filteredWords, hide, lang, multiSelect, selectedItems]
+    [filteredWords, hide, lang]
   );
 
   //detect scroll down and hide the header, scroll up and show the header
@@ -143,10 +131,14 @@ export default function Saved() {
   //scroll to top
   const flatListRef = React.useRef();
 
+  ///viewable items for enter animation
+  const viewableItems = useSharedValue([]);
+
   return (
     <View className="bg-slate-800 flex-1 flex-col justify-start items-center">
       <HeaderSearch
         data={savedWords}
+        filteredData={filteredWords}
         setData={setFilteredWords}
         hide={hide}
         setHide={setHide}
@@ -169,7 +161,11 @@ export default function Saved() {
       <View className="relative w-full pb-[120px] pt-2">
         {/** Scroll to top button */}
         {filteredWords && isHidden && (
-          <View className="absolute bottom-32 left-0 w-full flex-row justify-center z-40">
+          <Animated.View
+            entering={SlideInDown}
+            exiting={SlideOutDown}
+            className="absolute bottom-32 left-0 w-full flex-row justify-center z-40"
+          >
             <TouchableOpacity
               onPress={() =>
                 flatListRef.current.scrollToOffset({
@@ -185,7 +181,7 @@ export default function Saved() {
                 color="white"
               />
             </TouchableOpacity>
-          </View>
+          </Animated.View>
         )}
 
         {/** Add folders in an horizontal scroll 
@@ -200,10 +196,15 @@ export default function Saved() {
             ref={flatListRef}
             data={filteredWords}
             keyExtractor={(item) => item?.lang1}
+            windowSize={20}
             className="pb-10 pl-5"
             getItemCount={() => filteredWords?.length || 0}
             getItem={(_, index) => filteredWords?.[index]}
             renderItem={renderItem}
+            onViewableItemsChanged={({ viewableItems: vItems }) => {
+              viewableItems.value = vItems;
+              //console.log("viewableItems", viewableItems.value[0].item);
+            }}
             ListEmptyComponent={
               <Pressable
                 onPress={() => router.push("(tabs)/home")}

@@ -7,6 +7,7 @@ import {
   Modal,
   Pressable,
   BackHandler,
+  Alert,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import EditWord from "./EditWord";
@@ -117,7 +118,30 @@ export default function OptionsDrawer({
         <TouchableOpacity
           activeOpacity={0.75}
           onPress={() => {
-            handleRemove(word);
+            Alert.alert(
+              "Remove Word",
+              "Are you sure you want to remove the word?",
+              [
+                {
+                  text: "Cancel",
+                  onPress: () => console.log("Cancel Pressed"),
+                  style: "cancel",
+                },
+                {
+                  text: "OK",
+                  onPress: async () => {
+                    try {
+                      handleRemove(word);
+                    } catch (error) {
+                      console.error(
+                        "Error clearing data from AsyncStorage:",
+                        error
+                      );
+                    }
+                  },
+                },
+              ]
+            );
           }}
           className="w-full rounded-xl bg-red-500/50 py-2 flex-row justify-start px-3 items-center space-x-2 opacity-90 mt-3 mb-5"
         >

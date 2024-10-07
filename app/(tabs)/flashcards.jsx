@@ -22,8 +22,10 @@ import SpeechComponent from "../../components/Speech";
 import SavedLangSelector from "../../components/SavedLangSelector";
 import { useLang, useLanguageList } from "../../lib/store/store";
 import Animated, {
+  FadeIn,
   useAnimatedStyle,
   useSharedValue,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import SavedCategory from "../../components/SavedCategory";
@@ -51,6 +53,7 @@ const FlashCards = () => {
   //Animation for opacity
   const opacity = useSharedValue(0);
   const position = useSharedValue(0);
+  const rotate = useSharedValue(0);
 
   //Change opacity to 0 and after 300 ms to 1 once the show is true
   const animatedStyle = useAnimatedStyle(() => {
@@ -59,6 +62,23 @@ const FlashCards = () => {
       transform: [{ translateY: position.value }],
     };
   });
+
+  const flipAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ rotateY: `${rotate.value}deg` }],
+    };
+  }, []);
+
+  const contentStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ rotateY: `${-rotate.value}deg` }],
+    };
+  });
+
+  const flipCard = () => {
+    //flip the card 180  degrees
+    rotate.value = withTiming(rotate.value + 180, { duration: 500 });
+  };
 
   useEffect(() => {
     opacity.value = withTiming(show ? 1 : 0, { duration: 300 });
@@ -106,6 +126,7 @@ const FlashCards = () => {
   //get the saved word list and choose a random new word to show
   const getNewWord = () => {
     setLoading(true);
+    flipCard();
     fetchSavedWords().then((savedWords) => {
       setLangList(getLanguageList(savedWords));
       //filter the words that include word.lang === lang
@@ -158,8 +179,16 @@ const FlashCards = () => {
       </View>
 
       {/** Word Card */}
-      <View className="flex-1 w-full px-5 pb-5">
-        <View className="relative flex-1 flex-col justify-between items-center border border-slate-700 bg-slate-700/20 rounded-3xl">
+      <Animated.View
+        style={flipAnimatedStyle}
+        className="flex-1 w-full px-5 pb-5"
+      >
+        <Animated.View
+          style={contentStyle}
+          className={`relative flex-1 flex-col justify-between items-center border  bg-slate-700/20 rounded-3xl ${
+            word?.fav ? "border-blue-500" : "border-slate-700"
+          }`}
+        >
           {/** Refresh button */}
           <RefreshButton getNewWord={getNewWord} />
           {/** Language swap button */}
@@ -204,7 +233,10 @@ const FlashCards = () => {
                 <TouchableOpacity
                   title="Submit"
                   activeOpacity={0.75}
-                  onPress={() => setShow(!show)}
+                  onPress={() => {
+                    setShow(!show);
+                    //flipCard();
+                  }}
                 >
                   <Text className=" text-white text-xl font-bold pb-10 opacity-30">
                     Tap to reveal
@@ -213,8 +245,8 @@ const FlashCards = () => {
               )}
             </View>
           )}
-        </View>
-      </View>
+        </Animated.View>
+      </Animated.View>
     </View>
   );
 };
@@ -311,20 +343,59 @@ function LanguageSwitcher({ handleLanguage }) {
 }
 
 function FavButton({ word, handleFavorite }) {
+  //Animation
+
+  const opacity = useSharedValue(1);
+  const scale = useSharedValue(1);
+
+  function animateIn() {
+    opacity.value = 0;
+    scale.value = 0;
+    opacity.value = withTiming(1, { duration: 600 });
+    scale.value = withSpring(1, { damping: 5, stiffness: 100 });
+  }
+
+  function animateOut() {
+    opacity.value = 1;
+    scale.value = 1;
+    opacity.value = withTiming(0, { duration: 600 });
+    scale.value = withSpring(0, { damping: 5, stiffness: 100 });
+  }
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+      transform: [{ scale: scale.value }],
+    };
+  });
+
   return (
     <TouchableOpacity
       title="Submit"
       activeOpacity={0.75}
       onPress={() => {
         handleFavorite(word);
+        animateIn();
       }}
       className="absolute top-5 left-5"
     >
-      <MaterialCommunityIcons
-        name={word?.fav ? "cards-heart" : "cards-heart-outline"}
-        size={24}
-        color={word?.fav ? "#3b82f6" : "#94a3b8"}
-      />
+      {word?.fav ? (
+        <Animated.View style={animatedStyle}>
+          <MaterialCommunityIcons
+            name={"cards-heart"}
+            size={24}
+            color={"#3b82f6"}
+          />
+        </Animated.View>
+      ) : (
+        <Animated.View style={animatedStyle} className="opacity-70">
+          <MaterialCommunityIcons
+            name={"cards-heart-outline"}
+            size={24}
+            color={"#cbd5e1"}
+          />
+        </Animated.View>
+      )}
     </TouchableOpacity>
   );
 }

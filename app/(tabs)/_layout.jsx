@@ -3,21 +3,29 @@ import React from "react";
 import { Tabs, Redirect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import Animated from "react-native-reanimated";
 
 // The component is used to render the tabs in the app.
 const TabIcon = ({ icon, size, name, focused }) => {
   return (
     <View className="flex-1 items-center justify-center space-y-1 pt-3">
-      <MaterialCommunityIcons
-        name={icon}
-        size={size}
-        stro
-        color={`${focused ? "#3b82f6" : "gray"}`}
-      />
+      {focused ? (
+        <Animated.View>
+          <MaterialCommunityIcons
+            name={icon}
+            size={size}
+            stro
+            color={`#3b82f6`}
+          />
+        </Animated.View>
+      ) : (
+        <MaterialCommunityIcons name={icon} size={size} stro color={`gray`} />
+      )}
+
       <Text
         className={`text-white ${
           focused ? "font-bold text-blue-500" : "text-white"
-        }}`}
+        }} ${name === "Saved" && "pt-[3px]"}`}
       >
         {name}
       </Text>

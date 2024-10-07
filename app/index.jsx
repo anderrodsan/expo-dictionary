@@ -12,6 +12,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
+  ZoomIn,
 } from "react-native-reanimated";
 
 export default function Page() {
@@ -78,10 +79,10 @@ export default function Page() {
       </View>
       <Animated.View
         style={animatedOpacity}
-        className="flex flex-col items-center justify-center gap-3 w-full p-10 scale-150"
+        className="flex flex-col items-center justify-center gap-4 w-full p-10"
       >
-        <FontAwesome6 name="book" size={50} color="#cbd5e1" />
-        <Text className="text-slate-300 font-bold text-3xl">
+        <FontAwesome6 name="book" size={70} color="#cbd5e1" />
+        <Text className="text-slate-300 font-bold text-4xl">
           Word
           <Text className="text-blue-500">Wise</Text>
         </Text>
@@ -107,22 +108,28 @@ export default function Page() {
             }
 
             return (
-              <Pressable
-                className="relative w-1/2 px-2 py-1 rounded-xl bg-slate-600 m-1 flex-row items-center justify-center space-x-1"
+              <Animated.View
+                style={({ delay: index * 100 }, animatedWithTransition)}
                 key={index}
-                onPress={() => {
-                  setLang(lang);
-                  router.push("/home");
-                }}
+                className="w-1/2 m-1"
               >
-                <View className="absolute top-[7px] left-3 opacity-70">
-                  <Ionicons name="language" size={20} color="white" />
-                </View>
+                <Pressable
+                  className="w-full px-2 py-1 rounded-xl bg-slate-600 flex-row items-center justify-center space-x-1"
+                  key={index}
+                  onPress={() => {
+                    setLang(lang);
+                    router.push("/home");
+                  }}
+                >
+                  <View className="absolute top-[7px] left-3 opacity-70">
+                    <Ionicons name="language" size={20} color="white" />
+                  </View>
 
-                <Text className="text-white text-base text-center opacity-70">
-                  {findLanguage(lang)?.name}
-                </Text>
-              </Pressable>
+                  <Text className="text-white text-base text-center opacity-70">
+                    {findLanguage(lang)?.name}
+                  </Text>
+                </Pressable>
+              </Animated.View>
             );
           })}
           {/** Display the rest of the languages if the list is more than 3 */}

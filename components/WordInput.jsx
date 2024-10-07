@@ -82,6 +82,27 @@ const WordInput = ({ setLatestWord, savedWords, lang1, setLang1 }) => {
     }
   };
 
+  //Animations
+
+  const rotate = useSharedValue(0);
+  const handleSwap = () => {
+    //if swap rotate to one side and if not swap rotate to other side
+    if (swap) {
+      rotate.value = withTiming(rotate.value - 180, { duration: 300 });
+    } else {
+      rotate.value = withTiming(rotate.value + 180, { duration: 300 });
+    }
+    setSwap(!swap);
+  };
+
+  const flipAnimation = useAnimatedStyle(() => ({
+    transform: [{ rotateY: `${rotate.value}deg` }],
+  }));
+
+  const contentAnimation = useAnimatedStyle(() => ({
+    transform: [{ rotateY: `-${rotate.value}deg` }],
+  }));
+
   return (
     <View className="flex-col w-full justify-start items-center pb-5 pt-5">
       {/* Language Selector */}
@@ -99,13 +120,15 @@ const WordInput = ({ setLatestWord, savedWords, lang1, setLang1 }) => {
 
       <LanguageSwitcher
         swap={swap}
-        setSwap={setSwap}
+        handleSwap={handleSwap}
         lang1={lang1}
         setLang1={setLang1}
         lang2={lang2}
         setLang2={setLang2}
         setShow={setShow}
         setShow2={setShow2}
+        flipAnimation={flipAnimation}
+        contentAnimation={contentAnimation}
       />
 
       {/** Language selector modals*/}
@@ -135,17 +158,24 @@ const WordInput = ({ setLatestWord, savedWords, lang1, setLang1 }) => {
       />
 
       {/* Text Input Field */}
-      <TextInput
-        className="text-white text-3xl text-center rounded-xl max-w-[90%] border border-slate-700/80 bg-slate-800 px-5 py-5 mt-4"
-        ref={inputRef} // Assign the ref to the input field
-        onChangeText={handleInputChange}
-        value={text}
-        placeholder={
-          swap ? findLanguage(lang2)?.text : findLanguage(lang1)?.text
-        }
-        placeholderTextColor="#64748b"
-        onSubmitEditing={() => handleSubmit()}
-      />
+      <Animated.View
+        style={flipAnimation}
+        className="rounded-xl max-w-[90%] border border-slate-700/80 bg-slate-800 px-5 py-5 mt-4"
+      >
+        <Animated.View style={contentAnimation}>
+          <TextInput
+            className="text-white text-3xl text-center"
+            ref={inputRef} // Assign the ref to the input field
+            onChangeText={handleInputChange}
+            value={text}
+            placeholder={
+              swap ? findLanguage(lang2)?.text : findLanguage(lang1)?.text
+            }
+            placeholderTextColor="#64748b"
+            onSubmitEditing={() => handleSubmit()}
+          />
+        </Animated.View>
+      </Animated.View>
 
       {/** Display the first 3 filtered words */}
       <SuggestedWords
@@ -165,53 +195,34 @@ export default WordInput;
 
 //language selector 2 and swap
 function LanguageSwitcher({
-  swap,
-  setSwap,
+  handleSwap,
   lang1,
   setLang1,
   lang2,
   setLang2,
   setShow,
   setShow2,
+  flipAnimation,
+  contentAnimation,
   ...props
 }) {
-  const opacity = useSharedValue(1);
-  const rotate = useSharedValue(0);
-
-  function handleSwap() {
-    //set opacity to 0 and after 300 ms to 1
-    opacity.value = 0.5;
-    //if swap rotate to one side and if not swap rotate to other side
-    if (swap) {
-      rotate.value = withTiming(rotate.value - 180, { duration: 300 });
-    } else {
-      rotate.value = withTiming(rotate.value + 180, { duration: 300 });
-    }
-    setSwap(!swap);
-    opacity.value = withTiming(1, { duration: 300 });
-  }
-
-  const animatedIconStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotate.value}deg` }],
-    opacity: opacity.value,
-  }));
-
   return (
-    <View className="relative flex-row items-center justify-center px-5 pb-5">
+    <Animated.View
+      style={flipAnimation}
+      className="relative flex-row items-center justify-center px-5 pb-5"
+    >
       <View className="w-1/2 items-end px-5">
         <Pressable
           onPress={() => {
             setShow(true);
           }}
-          className={`rounded-2xl text-sm min-w-[80px] py-1 px-3 ${
-            swap ? "bg-slate-700" : "bg-blue-500/50"
-          }`}
+          className={`rounded-2xl text-sm min-w-[80px] py-1 px-3 bg-blue-500/50`}
         >
           <Animated.Text
-            style={{ opacity: opacity }}
+            style={contentAnimation}
             className="text-white text-center"
           >
-            {swap ? findLanguage(lang2)?.name : findLanguage(lang1)?.name}
+            {findLanguage(lang1)?.name}
           </Animated.Text>
         </Pressable>
       </View>
@@ -223,27 +234,24 @@ function LanguageSwitcher({
         onPress={() => handleSwap()}
         className="absolute inset-0 top-1"
       >
-        <Animated.View style={animatedIconStyle}>
-          <Ionicons name="repeat-sharp" size={20} color="white" />
-        </Animated.View>
+        <Ionicons name="repeat-sharp" size={20} color="white" />
       </TouchableOpacity>
 
       <View className="w-1/2 items-start px-5">
         <Pressable
           onPress={() => setShow2(true)}
-          className={`rounded-2xl text-sm min-w-[80px] py-1 px-3 ${
-            swap ? "bg-blue-500/50" : "bg-slate-700"
+          className={`rounded-2xl text-sm min-w-[80px] py-1 px-3 bg-slate-700
           }`}
         >
           <Animated.Text
-            style={{ opacity: opacity }}
+            style={contentAnimation}
             className="text-white text-center"
           >
-            {swap ? findLanguage(lang1)?.name : findLanguage(lang2)?.name}
+            {findLanguage(lang2)?.name}
           </Animated.Text>
         </Pressable>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 

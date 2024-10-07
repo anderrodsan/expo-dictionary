@@ -1,4 +1,5 @@
 import {
+  FlatList,
   ScrollView,
   StyleSheet,
   Text,
@@ -68,6 +69,29 @@ const SelectCategory = ({ filteredStatus, setFilteredStatus, savedWords }) => {
           </TouchableOpacity>
         );
       })}
+      {/* Same as the map but using flatlist */}
+      <FlatList
+        horizontal
+        data={statuses}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            title="difficulty"
+            activeOpacity={0.75}
+            onPress={() => setFilteredStatus(item.name)}
+            className={`rounded-full px-3 py-1 border ${
+              filteredStatus === item.name
+                ? item.color + " border-" + item.color
+                : " border-slate-500"
+            }`}
+          >
+            <Text className="text-white text-xs text-center">
+              {item.name} ({savedWords.length})
+            </Text>
+          </TouchableOpacity>
+        )}
+        keyExtractor={(item) => item.name}
+        showsHorizontalScrollIndicator={false}
+      />
     </ScrollView>
   );
 };

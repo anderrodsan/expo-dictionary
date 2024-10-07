@@ -18,9 +18,16 @@ import { useFocusEffect } from "expo-router";
 import Drawer from "./Drawer";
 import { findLanguage } from "../data/languageOptions";
 import SavedLangSelector from "./SavedLangSelector";
+import Animated, {
+  FadeOut,
+  SlideInRight,
+  SlideOutRight,
+  ZoomIn,
+} from "react-native-reanimated";
 
 export default function HeaderSearch({
   data,
+  filteredData,
   setData,
   hide,
   setHide,
@@ -58,7 +65,11 @@ export default function HeaderSearch({
   return (
     <View className="flex w-full px-5 ">
       {openSearch ? (
-        <View className="flex-row justify-between items-center w-full space-x-3 pt-4">
+        <Animated.View
+          entering={SlideInRight}
+          exiting={SlideOutRight}
+          className="relative flex-row justify-between items-center w-full space-x-3 pt-4 bg-slate-800"
+        >
           {/** Back Button */}
           <Pressable
             onPress={() => {
@@ -97,7 +108,10 @@ export default function HeaderSearch({
               //detect if the back button is pressed close
             }}
           />
-        </View>
+          <Text className="absolute top-[22px] right-2 text-white px-3 py-1 rounded-full bg-slate-600 text-xs">
+            {filteredData.length}
+          </Text>
+        </Animated.View>
       ) : (
         <View className="flex flex-col pt-5 pb-1 w-full border-slate-700">
           {/** Header content */}
@@ -111,30 +125,44 @@ export default function HeaderSearch({
             <TouchableOpacity
               onPress={() => setHide(!hide)}
               activeOpacity={0.75}
-              className={`px-2 py-1 rounded-lg mr-2 ${
-                hide ? "bg-blue-500/70" : "bg-slate-700"
-              }`}
+              className={`bg-slate-700 rounded-lg mr-2`}
             >
-              <MaterialCommunityIcons
-                name="eye-off-outline"
-                size={20}
-                color="white"
-              />
+              {hide && (
+                <Animated.View
+                  entering={ZoomIn.springify().damping(10).stiffness(100)}
+                  exiting={FadeOut}
+                  className="absolute top-0 w-full h-full rounded-lg bg-blue-500/70"
+                />
+              )}
+              <View className="px-2 py-1">
+                <MaterialCommunityIcons
+                  name="eye-off-outline"
+                  size={20}
+                  color="white"
+                />
+              </View>
             </TouchableOpacity>
 
             {/** Hide translations button */}
             <TouchableOpacity
               onPress={() => setSort(!sort)}
               activeOpacity={0.75}
-              className={`px-2 py-1 rounded-lg mr-2 ${
-                sort ? "bg-blue-500/70" : "bg-slate-700"
-              }`}
+              className={`relative rounded-lg bg-slate-700 mr-2`}
             >
-              <MaterialCommunityIcons
-                name="order-alphabetical-ascending"
-                size={20}
-                color="white"
-              />
+              {sort && (
+                <Animated.View
+                  entering={ZoomIn.springify().damping(10).stiffness(100)}
+                  exiting={FadeOut}
+                  className="absolute top-0 w-full h-full rounded-lg bg-blue-500/70"
+                />
+              )}
+              <View className="px-2 py-1">
+                <MaterialCommunityIcons
+                  name="order-alphabetical-ascending"
+                  size={20}
+                  color="white"
+                />
+              </View>
             </TouchableOpacity>
 
             {/** Select Language */}

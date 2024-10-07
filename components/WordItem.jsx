@@ -17,8 +17,10 @@ import EditWord from "./EditWord";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
+import FavButton from "./FavButton";
 
 const WordItem = ({
   item,
@@ -28,6 +30,7 @@ const WordItem = ({
   hide,
   lang,
   sort,
+  viewableItems,
   selectedItems,
   setSelectedItems,
   multiSelect,
@@ -46,7 +49,7 @@ const WordItem = ({
   const handleRemove = useCallback(
     (word) => {
       removeWord({ word }).then(() => {
-        handleRefresh();
+        setWord(null);
         setShow(false);
         setEdit(false);
       });
@@ -54,17 +57,13 @@ const WordItem = ({
     [handleRefresh]
   );
 
-  const handleFavorite = useCallback(
-    (word) => {
-      word.fav = !word.fav;
-      updateWord({ word }).then(() => {
-        handleRefresh();
-        setEdit(false);
-        setShow(false);
-      });
-    },
-    [handleRefresh]
-  );
+  const handleFavorite = useCallback((word) => {
+    // Create a new word object with the updated favorite status
+    const updatedWord = { ...word, fav: !word.fav };
+    setWord(updatedWord);
+    setShow(false);
+    updateWord({ word: updatedWord });
+  }, []);
 
   const handleEdit = () => {
     setShow(false);
@@ -100,7 +99,13 @@ const WordItem = ({
       savedWords[index - 1].lang1.charAt(0) !== item.lang1.charAt(0) ? (
       <View className={`text-xs mb-1 flex flex-row space-x-1 py-1`}>
         <Text className="text-blue-500 font-bold">
-          {item.lang1.charAt(0).toUpperCase()}
+          {item.lang1.charAt(0).toUpperCase()} (
+          {
+            savedWords.filter(
+              (word) => word.lang1.charAt(0) === item.lang1.charAt(0)
+            ).length
+          }
+          )
         </Text>
       </View>
     ) : null;
@@ -152,13 +157,43 @@ const WordItem = ({
     ) : null;
   }, [item.type]);
 
+  //inView animations
+  const rStyle = useAnimatedStyle(() => {
+    const isVisible = Boolean(
+      viewableItems.value
+        .filter((item) => item.isViewable)
+        .find((viewableItem) => viewableItem.item.id === item.id)
+    );
+
+    return {
+      opacity: isVisible ? withTiming(1) : withTiming(0),
+      transform: [
+        {
+          scale: isVisible
+            ? withSpring(1, { damping: 10, stiffness: 100 })
+            : withSpring(0.8, {
+                damping: 5,
+                stiffness: 100,
+              }),
+        },
+      ],
+    };
+  }, []);
+
+  if (word === null) {
+    return null;
+  }
+
   return (
-    <View className={`relative ${index === 0 && "mt-0"}`}>
+    <Animated.View
+      style={rStyle}
+      className={`relative ${index === 0 && "mt-0"}`}
+    >
       {sort ? firstLetter : dateLabel}
 
       <View
         className={`flex flex-row justify-between items-center p-3 mr-5 rounded-xl mb-2 border ${
-          item.fav ? "border-blue-500/80" : "border-slate-700"
+          word.fav ? "border-blue-500/80" : "border-slate-700"
         }
         
         `}
@@ -231,20 +266,7 @@ const WordItem = ({
             !selected && "bg-slate-800"
           }`}
         >
-          {item.fav && (
-            <TouchableOpacity
-              title="Submit"
-              activeOpacity={0.75}
-              onPress={() => handleFavorite(item)}
-              className="mr-1"
-            >
-              <MaterialCommunityIcons
-                name="cards-heart"
-                size={24}
-                color="#3b82f6"
-              />
-            </TouchableOpacity>
-          )}
+          <FavButton word={word} handleFavorite={handleFavorite} />
           <TouchableOpacity
             title="Submit"
             activeOpacity={0.75}
@@ -257,11 +279,10 @@ const WordItem = ({
             />
           </TouchableOpacity>
         </View>
-
         <EditWord word={item} visible={edit} setVisible={setEdit} />
         <View className="absolute inset-0">
           <OptionsDrawer
-            word={item}
+            word={word}
             lang={lang}
             show={show}
             setShow={setShow}
@@ -271,7 +292,7 @@ const WordItem = ({
           />
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 };
 
