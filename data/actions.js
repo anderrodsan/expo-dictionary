@@ -4,6 +4,7 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
 import { Alert } from "react-native";
+import { getCurrentDate } from "../lib/utils";
 
 //fetch saved words
 export const fetchSavedWords = async () => {
@@ -25,7 +26,7 @@ export const fetchSavedWords = async () => {
 };
 
 //fetch one random word that contains status == "new"
-export const fetchNewWord = async ({ data, filteredStatus }) => {
+export const fetchNewWord = async ({ data, filteredStatus, limit }) => {
   try {
     //const savedWordsString = await AsyncStorage.getItem("savedWords");
     if (data) {
@@ -39,9 +40,20 @@ export const fetchNewWord = async ({ data, filteredStatus }) => {
           ? data.filter((item) => item.fav === true)
           : data.filter((item) => item.status === filteredStatus);
 
+      //filter the words that have lastReviewed !== currentDate
+      const currentDate = getCurrentDate();
+
+      const filteredWordsWithLastReviewed = filteredWords.filter(
+        (word) => word?.lastReviewed !== currentDate
+      );
+
+      const finalFilteredWords = limit
+        ? filteredWordsWithLastReviewed
+        : filteredWords;
+
       //select a random item from filteredWord
-      const randomIndex = Math.floor(Math.random() * filteredWords.length);
-      const randomWord = filteredWords[randomIndex];
+      const randomIndex = Math.floor(Math.random() * finalFilteredWords.length);
+      const randomWord = finalFilteredWords[randomIndex];
       return randomWord;
     }
   } catch (error) {
@@ -336,10 +348,23 @@ export const uploadJSONData = async () => {
 
 //get the names of different languages in the list: "da", "en", etc.
 export const getLanguageList = (data) => {
-  return Array.from(new Set(data.map((item) => item.lang)));
+  //create an array including the languages
+  const langList = Array.from(new Set(data.map((item) => item.lang)));
+
+  const newLangList = langList.map((lang) => ({
+    value: lang,
+    count: data.filter((item) => item.lang === lang).length,
+  }));
+
+  return newLangList;
 };
 
 //get the words that include the lang: value ("da", "en", etc.)
-export const getLanguageWords = (data, lang) => {
-  return data.filter((item) => item.lang === lang);
+export const getLanguaguagesWithCount = (data, langList) => {
+  const newLangList = languages.map((lang) => ({
+    lang,
+    count: data.filter((item) => item.lang === lang).length,
+  }));
+
+  return newLangList;
 };

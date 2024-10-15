@@ -42,14 +42,21 @@ export default function FavButton({ word, handleFavorite }) {
     };
   });
 
+  if (!word.fav) {
+    return null;
+  }
+
   return (
     <Animated.View style={animatedStyle}>
       <TouchableOpacity
         title="Submit"
         activeOpacity={0.75}
         onPress={() => {
-          handleFavorite(word);
           animateOut();
+          //0.5s timeout for animation
+          setTimeout(() => {
+            handleFavorite(word);
+          }, 500);
         }}
         className="mr-1"
       >

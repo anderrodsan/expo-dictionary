@@ -8,6 +8,7 @@ import {
   Pressable,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import React, { useEffect, useState } from "react";
 import {
   clearAllData,
@@ -53,27 +54,39 @@ export default function Profile() {
 
   const categories = [
     {
-      name: "Total Saved",
+      name: "Total Words",
+      icon: "",
+      className: "bg-blue-500",
       value: savedWords?.length || 0,
     },
     {
       name: "Languages",
+      icon: "",
+      className: "border-slate-700",
       value: langList?.length || 0,
     },
     {
       name: "Liked",
+      icon: "",
+      className: "border-blue-500",
       value: savedWords?.filter((word) => word.fav === true).length || 0,
     },
     {
       name: "Known",
+      icon: "",
+      className: "border-slate-700",
       value: savedWords?.filter((word) => word.status === "Easy").length || 0,
     },
     {
       name: "Learning",
+      icon: "",
+      className: "border-slate-700",
       value: savedWords?.filter((word) => word.status === "Medium").length || 0,
     },
     {
       name: "Challenging",
+      icon: "",
+      className: "border-slate-700",
       value: savedWords?.filter((word) => word.status === "Hard").length || 0,
     },
   ];
@@ -129,9 +142,21 @@ export default function Profile() {
         {/** Number of words by categories */}
         <View className="flex flex-row flex-wrap justify-between px-4">
           {categories.map((category) => (
-            <View key={category.name} className="w-1/2 p-1">
-              <View className="px-5 py-3 rounded-xl border border-slate-700">
-                <Text className="font-bold text-blue-500">{category.name}</Text>
+            <View key={category.name} className={`p-1 w-1/2 `}>
+              <View
+                className={`px-5 py-3 rounded-xl border ${category.className}`}
+              >
+                <View className="flex flex-row items-center space-x-2">
+                  <Text
+                    className={`font-bold ${
+                      category.name === "Total Words"
+                        ? "text-white"
+                        : "text-blue-500"
+                    }`}
+                  >
+                    {category.name}
+                  </Text>
+                </View>
                 <View className="flex flex-row items-center justify-start space-x-[6px]">
                   <Text className="text-white text-lg opacity-90">
                     {category.value}
@@ -223,7 +248,7 @@ export default function Profile() {
           <TouchableOpacity
             activeOpacity={0.75}
             onPress={() => downloadJSONData(savedWords)}
-            className="mt-3 p-5 bg-blue-500/20 rounded-xl flex flex-row items-center space-x-2"
+            className="mt-3 p-5 bg-blue-500/50 rounded-xl flex flex-row items-center space-x-2"
           >
             <MaterialCommunityIcons name="download" size={24} color="#cbd5e1" />
             <Text className="text-slate-300 text-lg">Download data (JSON)</Text>
@@ -249,7 +274,7 @@ export default function Profile() {
               });
               onRefresh();
             }}
-            className="mt-3 p-5 bg-blue-500/20 rounded-xl flex flex-row items-center space-x-2"
+            className="mt-3 p-5 bg-blue-500/50 rounded-xl flex flex-row items-center space-x-2"
           >
             <MaterialCommunityIcons name="upload" size={24} color="#cbd5e1" />
             <Text className="text-slate-300 text-lg">Upload data (JSON)</Text>
@@ -273,7 +298,7 @@ export default function Profile() {
           <TouchableOpacity
             activeOpacity={0.75}
             onPress={() => clearAllData()}
-            className="mt-3 p-5 bg-red-500/20 rounded-xl flex flex-row items-center space-x-2"
+            className="mt-3 p-5 bg-red-500/50 rounded-xl flex flex-row items-center space-x-2"
           >
             <MaterialCommunityIcons name="delete" size={24} color="#cbd5e1" />
             <Text className="text-slate-300 text-lg">Delete all data</Text>

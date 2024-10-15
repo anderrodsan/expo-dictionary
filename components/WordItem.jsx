@@ -192,7 +192,7 @@ const WordItem = ({
       {sort ? firstLetter : dateLabel}
 
       <View
-        className={`flex flex-row justify-between items-center p-3 mr-5 rounded-xl mb-2 border ${
+        className={`flex flex-row justify-between items-center p-3 mr-5 rounded-xl mb-2 border overflow-hidden transition ease-in-out duration-300 ${
           word.fav ? "border-blue-500/80" : "border-slate-700"
         }
         
@@ -235,8 +235,8 @@ const WordItem = ({
             */
           className="flex-1 flex-col items-start justify-center"
         >
-          <View className="flex-1 flex-row justify-start items-center space-x-2">
-            <Text className="max-w-[90%] text-white font-bold text-lg pr-2">
+          <View className="flex-1 max-w-[70%] flex-row justify-start items-center space-x-2">
+            <Text className="whitespace-nowrap text-white font-bold text-lg pr-2">
               {item.lang1}
             </Text>
             <SpeechComponent

@@ -34,17 +34,17 @@ export default function SavedLangSelector({
         <View className="w-full px-5">
           {langList?.map((option, index) => {
             //find the language name
-            const language = findLanguage(option);
+            const language = findLanguage(option?.value);
 
             return (
               <TouchableOpacity
                 key={index}
                 activeOpacity={0.75}
                 onPress={() => {
-                  setLang(option);
+                  setLang(option.value);
                   setOpenDrawer(false);
                 }}
-                className={`w-full flex-row items-center justify-between p-3 my-1 rounded-lg ${
+                className={`w-full flex-row items-center justify-between space-x-2 p-3 my-1 rounded-lg ${
                   lang === language?.value
                     ? "bg-blue-500/50"
                     : "bg-slate-600/40"
@@ -53,9 +53,16 @@ export default function SavedLangSelector({
                 <View className="opacity-70">
                   <Ionicons name="language" size={20} color="white" />
                 </View>
-                <Text className="flex-1 ml-2 text-white text-start opacity-90">
-                  {language?.name}
-                </Text>
+                <View className="flex-1 flex-row items-center space-x-2">
+                  <Text className="text-white text-start opacity-90">
+                    {language?.name}
+                  </Text>
+                  <Text
+                    className={`text-white text-xs ml-2 rounded-full bg-slate-500 px-2`}
+                  >
+                    {option?.count}
+                  </Text>
+                </View>
                 <Text className="text-white text-start opacity-50">
                   {language?.original}
                 </Text>

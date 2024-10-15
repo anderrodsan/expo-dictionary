@@ -84,7 +84,7 @@ export default function Saved() {
         : sortedWords.filter((item) => item.status === category);
 
     //update the states
-    setSavedWords(savedWords);
+    setSavedWords(filteredByLang);
     setFilteredWords(finalFilteredWords);
     setLangList(getLanguageList(savedWords)); // Set language list after filtering
     setRefreshing(false);

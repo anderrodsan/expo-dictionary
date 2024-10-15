@@ -95,7 +95,7 @@ export default function Page() {
       </Animated.Text>
 
       {/** Language selector with the saved languages */}
-      {langList?.length > 0 && (
+      {langList?.length > 0 ? (
         <Animated.View
           style={animatedWithTransition}
           className="flex-row justify-center items-center flex-wrap w-full px-5"
@@ -103,7 +103,7 @@ export default function Page() {
           {/** Display the first 3 languages if the list is more than 3 */}
           {langList?.slice(0, 4).map((lang, index) => {
             //Avoid empty item in iOS
-            if (lang === "" || null) {
+            if (lang?.value === "" || null) {
               return null;
             }
 
@@ -111,22 +111,27 @@ export default function Page() {
               <Animated.View
                 style={({ delay: index * 100 }, animatedWithTransition)}
                 key={index}
-                className="w-1/2 m-1"
+                className="w-[55%] m-1"
               >
                 <Pressable
-                  className="w-full px-2 py-1 rounded-xl bg-slate-600 flex-row items-center justify-center space-x-1"
+                  className="w-full px-2 py-1 rounded-xl bg-slate-600 flex-row items-center justify-between space-x-3"
                   key={index}
                   onPress={() => {
-                    setLang(lang);
+                    setLang(lang?.value);
                     router.push("/home");
                   }}
                 >
-                  <View className="absolute top-[7px] left-3 opacity-70">
+                  <View className="opacity-70">
                     <Ionicons name="language" size={20} color="white" />
                   </View>
 
-                  <Text className="text-white text-base text-center opacity-70">
-                    {findLanguage(lang)?.name}
+                  <Text className="flex-1 text-white text-base text-start opacity-70">
+                    {findLanguage(lang?.value)?.name}
+                  </Text>
+                  <Text
+                    className={`text-white text-xs ml-2 rounded-full bg-slate-500 px-2`}
+                  >
+                    {lang?.count}
                   </Text>
                 </Pressable>
               </Animated.View>
@@ -134,27 +139,22 @@ export default function Page() {
           })}
           {/** Display the rest of the languages if the list is more than 3 */}
           <Pressable
-            className="w-1/2 px-2 py-1 rounded-xl bg-blue-500/50 m-1 flex-row items-center justify-center space-x-1"
+            className="w-[55%] px-2 py-1 rounded-xl bg-blue-500/50 m-1 flex-row items-center justify-start space-x-3"
             onPress={() => {
               setShow(true);
             }}
           >
-            <View className="absolute top-[7px] left-3 opacity-70">
+            <View className="opacity-70">
               <Ionicons name="add" size={20} color="white" />
             </View>
-            <Text className="text-white text-base text-center opacity-70">
+            <Text className="flex-1 text-white text-base text-start opacity-70">
               More
             </Text>
           </Pressable>
         </Animated.View>
-      )}
-
-      {/** Get started button if there's no saved languages */}
-      {(langList?.length === 0 ||
-        langList === null ||
-        langList === undefined ||
-        langList === "") && (
+      ) : (
         <Animated.View style={animatedWithTransition}>
+          {/** Get started button if there's no saved languages */}
           <Pressable
             onPress={() => {
               setShow(true);
